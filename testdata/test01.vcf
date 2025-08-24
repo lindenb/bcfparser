@@ -1,0 +1,461 @@
+##fileformat=VCFv4.2
+##FILTER=<ID=PASS,Description="All filters passed">
+##FILTER=<ID=BAD_SO,Description="Variant non having SO terms :SO:0001595(plus_2_frameshift_variant), SO:0001578(stop_lost), SO:0001583(missense_variant), SO:0001822(inframe_deletion), SO:0001591(frame_restoring_variant), SO:0001992(nonsynonymous_variant), SO:0001587(stop_gained), SO:0001592(minus_1_frameshift_variant), SO:0001630(splice_region_variant), SO:0001575(splice_donor_variant), SO:0001629(splice_site_variant), SO:0001568(splicing_variant), SO:0001585(conservative_missense_variant), SO:0001589(frameshift_variant), SO:0001626(incomplete_terminal_codon_variant), SO:0002009(selenocysteine_loss), SO:0002170(splice_donor_region_variant), SO:0002088(non_coding_transcript_splice_region_variant), SO:0001826(disruptive_inframe_deletion), SO:0001594(plus_1_frameshift_variant), SO:0001586(non_conservative_missense_variant), SO:0001825(conservative_inframe_deletion), SO:0001593(minus_2_frameshift_variant), SO:0001650(inframe_variant), SO:0002010(pyrrolysine_loss), SO:0002169(splice_polypyrimidine_tract_variant), SO:0001571(cryptic_splice_donor), SO:0002214(redundant_inserted_stop_gained), SO:0002084(exonic_splice_region_variant), SO:0001574(splice_acceptor_variant), SO:0001573(intron_gain_variant), SO:0001821(inframe_insertion), SO:0001909(frameshift_elongation), SO:0002012(start_lost), SO:0001818(protein_altering_variant), SO:0001823(conservative_inframe_insertion), SO:0001820(inframe_indel), SO:0001572(exon_loss_variant), SO:0001787(splice_donor_5th_base_variant), SO:0001995(extended_intronic_splice_region_variant), SO:0001570(cryptic_splice_acceptor), SO:0002008(rare_amino_acid_variant), SO:0001569(cryptic_splice_site_variant), SO:0001910(frameshift_truncation), SO:0001824(disruptive_inframe_insertion)">
+##FILTER=<ID=GNOMAD_EXOME_AC0,Description="[gnomad-exome]Allele count is zero after filtering out low-confidence genotypes (GQ < 20; DP < 10; and AB < 0.2 for het calls) in /LAB-DATA/BiRD/resources/species/human/broadinstitute.org/gnomad/release-181127/2.1/vcf/exomes/gnomad.exomes.r2.1.sites.vcf.gz">
+##FILTER=<ID=GNOMAD_EXOME_BAD_AF,Description="AF if not between 0.0<= 'af' <=0.001 for /LAB-DATA/BiRD/resources/species/human/broadinstitute.org/gnomad/release-181127/2.1/vcf/exomes/gnomad.exomes.r2.1.sites.vcf.gz">
+##FILTER=<ID=GNOMAD_EXOME_InbreedingCoeff,Description="[gnomad-exome]InbreedingCoeff < -0.3 in /LAB-DATA/BiRD/resources/species/human/broadinstitute.org/gnomad/release-181127/2.1/vcf/exomes/gnomad.exomes.r2.1.sites.vcf.gz">
+##FILTER=<ID=GNOMAD_EXOME_RF,Description="[gnomad-exome]Failed random forest filtering thresholds of 0.055272738028512555, 0.20641025579497013 (probabilities of being a true positive variant) for SNPs, indels in /LAB-DATA/BiRD/resources/species/human/broadinstitute.org/gnomad/release-181127/2.1/vcf/exomes/gnomad.exomes.r2.1.sites.vcf.gz">
+##FILTER=<ID=GNOMAD_GENOME_AC0,Description="[gnomad-genome]Allele count is zero after filtering out low-confidence genotypes (GQ < 20; DP < 10; and AB < 0.2 for het calls) in /LAB-DATA/BiRD/resources/species/human/broadinstitute.org/gnomad/release-181127/2.1/vcf/genomes/gnomad.genomes.r2.1.sites.vcf.gz">
+##FILTER=<ID=GNOMAD_GENOME_BAD_AF,Description="AF if not between 0.0<= 'af' <=0.001 for /LAB-DATA/BiRD/resources/species/human/broadinstitute.org/gnomad/release-181127/2.1/vcf/genomes/gnomad.genomes.r2.1.sites.vcf.gz">
+##FILTER=<ID=GNOMAD_GENOME_InbreedingCoeff,Description="[gnomad-genome]InbreedingCoeff < -0.3 in /LAB-DATA/BiRD/resources/species/human/broadinstitute.org/gnomad/release-181127/2.1/vcf/genomes/gnomad.genomes.r2.1.sites.vcf.gz">
+##FILTER=<ID=GNOMAD_GENOME_RF,Description="[gnomad-genome]Failed random forest filtering thresholds of 0.2634762834546574, 0.22213813189901457 (probabilities of being a true positive variant) for SNPs, indels in /LAB-DATA/BiRD/resources/species/human/broadinstitute.org/gnomad/release-181127/2.1/vcf/genomes/gnomad.genomes.r2.1.sites.vcf.gz">
+##FILTER=<ID=HET_BAD_AD_RATIO,Description="Filtered with VcfFilterJdk">
+##FILTER=<ID=LOW_DP10,Description="Filtered with VcfFilterJdk">
+##FILTER=<ID=LOW_GQ90,Description="Filtered with VcfFilterJdk">
+##FILTER=<ID=LowQual,Description="Low quality">
+##FILTER=<ID=POLYX_ge_5,Description="Number of repeated bases around REF is greater or equal to 5">
+##FORMAT=<ID=ZX,Number=.,Type=Integer,Description="">
+##FORMAT=<ID=FT,Number=.,Type=String,Description="Genotype-level filter">
+##FORMAT=<ID=BCSQ,Number=.,Type=Integer,Description="Bitmask of indexes to INFO/BCSQ, with interleaved first/second haplotype. Use \"bcftools query -f'[%CHROM\t%POS\t%SAMPLE\t%TBCSQ\n]'\" to translate.">
+##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Approximate read depth (reads with MQ=255 or with bad mates are filtered)">
+##FORMAT=<ID=FT,Number=.,Type=String,Description="Genotype-level filter">
+##FORMAT=<ID=GQ,Number=1,Type=Integer,Description="Genotype Quality">
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+##FORMAT=<ID=PL,Number=G,Type=Integer,Description="Normalized, Phred-scaled likelihoods for genotypes as defined in the VCF specification">
+##GATKCommandLine=<ID=HaplotypeCaller,CommandLine="HaplotypeCaller --dbsnp /LAB-DATA/BiRD/resources/species/human/broadinstitute.org/bundle/1.5/b37/dbsnp_135.b37.vcf.gz --do-not-run-physical-phasing true --output jeter.vcf.gz --intervals /SCRATCH-BIRD/users/lindenbaum-p/work/NEXTFLOW/20220119.barcelone.ttn.human_g1k_v37.direct/work/BED/cluster.000000001.bed --input /SCRATCH-BIRD/users/lindenbaum-p/work/NEXTFLOW/20220119.barcelone.ttn.human_g1k_v37.direct/work/31/3894185894fac1d942d25353d51a67/chunk.aa.list --reference /LAB-DATA/BiRD/resources/species/human/broadinstitute.org/bundle/1.5/b37/human_g1k_v37.fasta --seconds-between-progress-updates 60.0 --annotation-group StandardHCAnnotation --annotation-group StandardAnnotation --use-posteriors-to-calculate-qual false --dont-use-dragstr-priors false --use-new-qual-calculator true --annotate-with-num-discovered-alleles false --heterozygosity 0.001 --indel-heterozygosity 1.25E-4 --heterozygosity-stdev 0.01 --standard-min-confidence-threshold-for-calling 30.0 --max-alternate-alleles 6 --max-genotype-count 1024 --sample-ploidy 2 --num-reference-samples-if-no-call 0 --genotype-assignment-method USE_PLS_TO_ASSIGN --contamination-fraction-to-filter 0.0 --output-mode EMIT_VARIANTS_ONLY --all-site-pls false --gvcf-gq-bands 1 --gvcf-gq-bands 2 --gvcf-gq-bands 3 --gvcf-gq-bands 4 --gvcf-gq-bands 5 --gvcf-gq-bands 6 --gvcf-gq-bands 7 --gvcf-gq-bands 8 --gvcf-gq-bands 9 --gvcf-gq-bands 10 --gvcf-gq-bands 11 --gvcf-gq-bands 12 --gvcf-gq-bands 13 --gvcf-gq-bands 14 --gvcf-gq-bands 15 --gvcf-gq-bands 16 --gvcf-gq-bands 17 --gvcf-gq-bands 18 --gvcf-gq-bands 19 --gvcf-gq-bands 20 --gvcf-gq-bands 21 --gvcf-gq-bands 22 --gvcf-gq-bands 23 --gvcf-gq-bands 24 --gvcf-gq-bands 25 --gvcf-gq-bands 26 --gvcf-gq-bands 27 --gvcf-gq-bands 28 --gvcf-gq-bands 29 --gvcf-gq-bands 30 --gvcf-gq-bands 31 --gvcf-gq-bands 32 --gvcf-gq-bands 33 --gvcf-gq-bands 34 --gvcf-gq-bands 35 --gvcf-gq-bands 36 --gvcf-gq-bands 37 --gvcf-gq-bands 38 --gvcf-gq-bands 39 --gvcf-gq-bands 40 --gvcf-gq-bands 41 --gvcf-gq-bands 42 --gvcf-gq-bands 43 --gvcf-gq-bands 44 --gvcf-gq-bands 45 --gvcf-gq-bands 46 --gvcf-gq-bands 47 --gvcf-gq-bands 48 --gvcf-gq-bands 49 --gvcf-gq-bands 50 --gvcf-gq-bands 51 --gvcf-gq-bands 52 --gvcf-gq-bands 53 --gvcf-gq-bands 54 --gvcf-gq-bands 55 --gvcf-gq-bands 56 --gvcf-gq-bands 57 --gvcf-gq-bands 58 --gvcf-gq-bands 59 --gvcf-gq-bands 60 --gvcf-gq-bands 70 --gvcf-gq-bands 80 --gvcf-gq-bands 90 --gvcf-gq-bands 99 --floor-blocks false --indel-size-to-eliminate-in-ref-model 10 --disable-optimizations false --dragen-mode false --apply-bqd false --apply-frd false --disable-spanning-event-genotyping false --transform-dragen-mapping-quality false --mapping-quality-threshold-for-genotyping 20 --max-effective-depth-adjustment-for-frd 0 --just-determine-active-regions false --dont-genotype false --do-not-correct-overlapping-quality false --use-filtered-reads-for-annotations false --adaptive-pruning false --do-not-recover-dangling-branches false --recover-dangling-heads false --kmer-size 10 --kmer-size 25 --dont-increase-kmer-sizes-for-cycles false --allow-non-unique-kmers-in-ref false --num-pruning-samples 1 --min-dangling-branch-length 4 --recover-all-dangling-branches false --max-num-haplotypes-in-population 128 --min-pruning 2 --adaptive-pruning-initial-error-rate 0.001 --pruning-lod-threshold 2.302585092994046 --pruning-seeding-lod-threshold 9.210340371976184 --max-unpruned-variants 100 --linked-de-bruijn-graph false --disable-artificial-haplotype-recovery false --enable-legacy-graph-cycle-detection false --debug-assembly false --debug-graph-transformations false --capture-assembly-failure-bam false --num-matching-bases-in-dangling-end-to-recover -1 --error-correction-log-odds -Infinity --error-correct-reads false --kmer-length-for-read-error-correction 25 --min-observations-for-kmer-to-be-solid 20 --base-quality-score-threshold 18 --dragstr-het-hom-ratio 2 --dont-use-dragstr-pair-hmm-scores false --pair-hmm-gap-continuation-penalty 10 --expected-mismatch-rate-for-read-disqualification 0.02 --pair-hmm-implementation FASTEST_AVAILABLE --pcr-indel-model CONSERVATIVE --phred-scaled-global-read-mismapping-rate 45 --disable-symmetric-hmm-normalizing false --disable-cap-base-qualities-to-map-quality false --enable-dynamic-read-disqualification-for-genotyping false --dynamic-read-disqualification-threshold 1.0 --native-pair-hmm-threads 4 --native-pair-hmm-use-double-precision false --bam-writer-type CALLED_HAPLOTYPES --dont-use-soft-clipped-bases false --min-base-quality-score 10 --smith-waterman JAVA --emit-ref-confidence NONE --max-mnp-distance 0 --force-call-filtered-alleles false --soft-clip-low-quality-ends false --allele-informative-reads-overlap-margin 2 --smith-waterman-dangling-end-match-value 25 --smith-waterman-dangling-end-mismatch-penalty -50 --smith-waterman-dangling-end-gap-open-penalty -110 --smith-waterman-dangling-end-gap-extend-penalty -6 --smith-waterman-haplotype-to-reference-match-value 200 --smith-waterman-haplotype-to-reference-mismatch-penalty -150 --smith-waterman-haplotype-to-reference-gap-open-penalty -260 --smith-waterman-haplotype-to-reference-gap-extend-penalty -11 --smith-waterman-read-to-haplotype-match-value 10 --smith-waterman-read-to-haplotype-mismatch-penalty -15 --smith-waterman-read-to-haplotype-gap-open-penalty -30 --smith-waterman-read-to-haplotype-gap-extend-penalty -5 --min-assembly-region-size 50 --max-assembly-region-size 300 --active-probability-threshold 0.002 --max-prob-propagation-distance 50 --force-active false --assembly-region-padding 100 --padding-around-indels 75 --padding-around-snps 20 --padding-around-strs 75 --max-extension-into-assembly-region-padding-legacy 25 --max-reads-per-alignment-start 50 --enable-legacy-assembly-region-trimming false --interval-set-rule UNION --interval-padding 0 --interval-exclusion-padding 0 --interval-merging-rule ALL --read-validation-stringency SILENT --disable-sequence-dictionary-validation false --create-output-bam-index true --create-output-bam-md5 false --create-output-variant-index true --create-output-variant-md5 false --max-variants-per-shard 0 --lenient false --add-output-sam-program-record true --add-output-vcf-command-line true --cloud-prefetch-buffer 40 --cloud-index-prefetch-buffer -1 --disable-bam-index-caching false --sites-only-vcf-output false --help false --version false --showHidden false --verbosity INFO --QUIET false --use-jdk-deflater false --use-jdk-inflater false --gcs-max-retries 20 --gcs-project-for-requester-pays  --disable-tool-default-read-filters false --minimum-mapping-quality 20 --disable-tool-default-annotations false --enable-all-annotations false --allow-old-rms-mapping-quality-annotation-data false",Version="4.2.3.0",Date="January 19, 2022 10:48:54 AM CET">
+##INFO=<ID=AC,Number=A,Type=Integer,Description="Allele count in genotypes, for each ALT allele, in the same order as listed">
+##INFO=<ID=AC_AMALGAMION,Number=A,Type=Integer,Description="AC from /LAB-DATA/BiRD/shares/ITX/u1087/AMALGAMION/20210603.hs37d5.amalgamion.genotyped.bcf">
+##INFO=<ID=AC_TOMMO,Number=A,Type=Integer,Description="AC from Tommo DB">
+##INFO=<ID=AF,Number=A,Type=Float,Description="Allele Frequency, for each ALT allele, in the same order as listed">
+##INFO=<ID=AF_AMALGAMION,Number=A,Type=Float,Description="AF from /LAB-DATA/BiRD/shares/ITX/u1087/AMALGAMION/20210603.hs37d5.amalgamion.genotyped.bcf">
+##INFO=<ID=AF_TOMMO,Number=A,Type=Float,Description="AF from Tommo DB">
+##INFO=<ID=AN,Number=1,Type=Integer,Description="Total number of alleles in called genotypes">
+##INFO=<ID=ANN,Number=.,Type=String,Description="Functional annotations: 'Allele | Annotation | Annotation_Impact | Gene_Name | Gene_ID | Feature_Type | Feature_ID | Transcript_BioType | Rank | HGVS.c | HGVS.p | cDNA.pos / cDNA.length | CDS.pos / CDS.length | AA.pos / AA.length | Distance | ERRORS / WARNINGS / INFO'">
+##INFO=<ID=AN_AMALGAMION,Number=1,Type=Integer,Description="AF from /LAB-DATA/BiRD/shares/ITX/u1087/AMALGAMION/20210603.hs37d5.amalgamion.genotyped.bcf">
+##INFO=<ID=AN_TOMMO,Number=1,Type=Integer,Description="AF from Tommo DB">
+##INFO=<ID=BCSQ,Number=.,Type=String,Description="Local consequence annotation from BCFtools/csq, see http://samtools.github.io/bcftools/howtos/csq-calling.html for details. Format: Consequence|gene|transcript|biotype|strand|amino_acid_change|dna_change">
+##INFO=<ID=BaseQRankSum,Number=1,Type=Float,Description="Z-score from Wilcoxon rank sum test of Alt Vs. Ref base qualities">
+##INFO=<ID=CADD_PHRED,Number=A,Type=Float,Description="PHRED expressing the rank in order of magnitude terms. For example, reference genome single nucleotide variants at the 10th-% of CADD scores are assigned to CADD-10, top 1% to CADD-20, top 0.1% to CADD-30, etc.  URI was /LAB-DATA/BiRD/resources/species/human/krishna.gs.washington.edu/download/CADD/v1.6/whole_genome_SNVs.tsv.gz. We use -999.0 for unknown value.">
+##INFO=<ID=CADD_SCORE,Number=A,Type=Float,Description="Score suggests that that variant is likely to be  observed (negative values) vs simulated(positive values).However, raw values do have relative meaning, with higher values indicating that a variant is more likely to be simulated (or -not observed-) and therefore more likely to have deleterious effects. URI was /LAB-DATA/BiRD/resources/species/human/krishna.gs.washington.edu/download/CADD/v1.6/whole_genome_SNVs.tsv.gz. We use -999.0 for unknown value.">
+##INFO=<ID=CSQ,Number=.,Type=String,Description="Consequence annotations from Ensembl VEP. Format: Allele|Consequence|IMPACT|SYMBOL|Gene|Feature_type|Feature|BIOTYPE|EXON|INTRON|HGVSc|HGVSp|cDNA_position|CDS_position|Protein_position|Amino_acids|Codons|Existing_variation|DISTANCE|STRAND|FLAGS|SYMBOL_SOURCE|HGNC_ID|REFSEQ_MATCH|SOURCE|REFSEQ_OFFSET">
+##INFO=<ID=DB,Number=0,Type=Flag,Description="dbSNP Membership">
+##INFO=<ID=DP,Number=1,Type=Integer,Description="Approximate read depth; some reads may have been filtered">
+##INFO=<ID=ExcessHet,Number=1,Type=Float,Description="Phred-scaled p-value for exact test of excess heterozygosity">
+##INFO=<ID=FS,Number=1,Type=Float,Description="Phred-scaled p-value using Fisher's exact test to detect strand bias">
+##INFO=<ID=GNOMAD_SV,Number=.,Type=String,Description="Gnomad SV /SCRATCH-BIRD/users/lindenbaum-p/work/NEXTFLOW/20220120.barcelone.ttn.hs37d5/work/ef/00e44df9653c34e61843c54c4ac908/gnomad.sv.bed.gz. AF>= 0.1">
+##INFO=<ID=GO,Number=0,Type=Flag,Description="Overlap gene annotated with Gene Ontology and the terms from GO:0006936,GO:0022857,GO:0060047,GO:0003179,GO:0008016 (experimental)">
+##INFO=<ID=IN_AMALGAMION,Number=0,Type=Flag,Description="Sites listed in IN_AMALGAMION">
+##INFO=<ID=IN_GNOMAD_EXOME,Number=0,Type=Flag,Description="Variant CHROM/POS/REF was found in gnomad /LAB-DATA/BiRD/resources/species/human/broadinstitute.org/gnomad/release-181127/2.1/vcf/exomes/gnomad.exomes.r2.1.sites.vcf.gz">
+##INFO=<ID=IN_GNOMAD_GENOME,Number=0,Type=Flag,Description="Variant CHROM/POS/REF was found in gnomad /LAB-DATA/BiRD/resources/species/human/broadinstitute.org/gnomad/release-181127/2.1/vcf/genomes/gnomad.genomes.r2.1.sites.vcf.gz">
+##INFO=<ID=IN_TOMMO,Number=0,Type=Flag,Description="Sites listed in IN_TOMMO">
+##INFO=<ID=InbreedingCoeff,Number=1,Type=Float,Description="Inbreeding coefficient as estimated from the genotype likelihoods per-sample when compared against the Hardy-Weinberg expectation">
+##INFO=<ID=LOF,Number=.,Type=String,Description="Predicted loss of function effects for this variant. Format: 'Gene_Name | Gene_ID | Number_of_transcripts_in_gene | Percent_of_transcripts_affected'">
+##INFO=<ID=MLEAC,Number=A,Type=Integer,Description="Maximum likelihood expectation (MLE) for the allele counts (not necessarily the same as the AC), for each ALT allele, in the same order as listed">
+##INFO=<ID=MLEAF,Number=A,Type=Float,Description="Maximum likelihood expectation (MLE) for the allele frequency (not necessarily the same as the AF), for each ALT allele, in the same order as listed">
+##INFO=<ID=MQ,Number=1,Type=Float,Description="RMS Mapping Quality">
+##INFO=<ID=MQRankSum,Number=1,Type=Float,Description="Z-score From Wilcoxon rank sum test of Alt vs. Ref read mapping qualities">
+##INFO=<ID=NMD,Number=.,Type=String,Description="Predicted nonsense mediated decay effects for this variant. Format: 'Gene_Name | Gene_ID | Number_of_transcripts_in_gene | Percent_of_transcripts_affected'">
+##INFO=<ID=N_GNOMAD_EXOME,Number=1,Type=Integer,Description="Count Gnomad Variants that were found overlapping the user variant, not necessarily at the same CHROM/POS in /LAB-DATA/BiRD/resources/species/human/broadinstitute.org/gnomad/release-181127/2.1/vcf/exomes/gnomad.exomes.r2.1.sites.vcf.gz">
+##INFO=<ID=N_GNOMAD_GENOME,Number=1,Type=Integer,Description="Count Gnomad Variants that were found overlapping the user variant, not necessarily at the same CHROM/POS in /LAB-DATA/BiRD/resources/species/human/broadinstitute.org/gnomad/release-181127/2.1/vcf/genomes/gnomad.genomes.r2.1.sites.vcf.gz">
+##INFO=<ID=POLYX,Number=1,Type=Integer,Description="Number of repeated bases around REF">
+##INFO=<ID=QD,Number=1,Type=Float,Description="Variant Confidence/Quality by Depth">
+##INFO=<ID=REGULATORY_FEAT,Number=.,Type=String,Description="Regulatory Features.">
+##INFO=<ID=REPEAT,Number=0,Type=Flag,Description="Simple Repeats from /SCRATCH-BIRD/users/lindenbaum-p/work/NEXTFLOW/20220120.barcelone.ttn.hs37d5/work/63/3284f514adfd2e99f8646379e269e3/simpleRepeats.bed.gz">
+##INFO=<ID=ReadPosRankSum,Number=1,Type=Float,Description="Z-score from Wilcoxon rank sum test of Alt vs. Ref read position bias">
+##INFO=<ID=SEX,Number=0,Type=Flag,Description="Variant is mapped on a sexual chromosome on GRCh37 excluding PAR region(s) on X:60001-2699520 X:154931044-155260560 Y:10001-2649520 Y:59034050-59363566">
+##INFO=<ID=SOR,Number=1,Type=Float,Description="Symmetric Odds Ratio of 2x2 contingency table to detect strand bias">
+##INFO=<ID=VISTA_ENHANCER,Number=.,Type=String,Description="Vista Enhancers from /SCRATCH-BIRD/users/lindenbaum-p/work/NEXTFLOW/20220120.barcelone.ttn.hs37d5/work/07/92e89b59ef0145be63cf1b3a99327c/vistaEnhancers.bed.gz">
+##INFO=<ID=gnomad_exome_AF_POPMAX,Number=A,Type=Float,Description="[gnomad-exome]Maximum allele frequency across populations (excluding samples of Ashkenazi, Finnish, and indeterminate ancestry) in /LAB-DATA/BiRD/resources/species/human/broadinstitute.org/gnomad/release-181127/2.1/vcf/exomes/gnomad.exomes.r2.1.sites.vcf.gz">
+##INFO=<ID=gnomad_genome_AF_POPMAX,Number=A,Type=Float,Description="[gnomad-genome]Maximum allele frequency across populations (excluding samples of Ashkenazi, Finnish, and indeterminate ancestry) in /LAB-DATA/BiRD/resources/species/human/broadinstitute.org/gnomad/release-181127/2.1/vcf/genomes/gnomad.genomes.r2.1.sites.vcf.gz">
+##INFO=<ID=TAG1,Number=.,Type=String,Description="TAG1">
+##INFO=<ID=TAG2,Number=.,Type=String,Description="TAG2">
+##INFO=<ID=TAG3,Number=.,Type=String,Description="TAG3">
+##INFO=<ID=TAG4,Number=.,Type=String,Description="TAG4">
+##INFO=<ID=TAG5,Number=.,Type=String,Description="TAG5">
+##INFO=<ID=TAG6,Number=.,Type=String,Description="TAG6">
+##INFO=<ID=TAG7,Number=.,Type=String,Description="TAG7">
+##INFO=<ID=TAG8,Number=.,Type=String,Description="TAG8">
+##INFO=<ID=TAG9,Number=.,Type=String,Description="TAG9">
+##INFO=<ID=TAG10,Number=.,Type=String,Description="TAG10">
+##INFO=<ID=TAG11,Number=.,Type=String,Description="TAG11">
+##INFO=<ID=TAG12,Number=.,Type=String,Description="TAG12">
+##INFO=<ID=TAG13,Number=.,Type=String,Description="TAG13">
+##INFO=<ID=TAG14,Number=.,Type=String,Description="TAG14">
+##INFO=<ID=TAG15,Number=.,Type=String,Description="TAG15">
+##INFO=<ID=TAG16,Number=.,Type=String,Description="TAG16">
+##INFO=<ID=TAG17,Number=.,Type=String,Description="TAG17">
+##INFO=<ID=TAG18,Number=.,Type=String,Description="TAG18">
+##INFO=<ID=TAG19,Number=.,Type=String,Description="TAG19">
+##INFO=<ID=TAG20,Number=.,Type=String,Description="TAG20">
+##INFO=<ID=TAG21,Number=.,Type=String,Description="TAG21">
+##INFO=<ID=TAG22,Number=.,Type=String,Description="TAG22">
+##INFO=<ID=TAG23,Number=.,Type=String,Description="TAG23">
+##INFO=<ID=TAG24,Number=.,Type=String,Description="TAG24">
+##INFO=<ID=TAG25,Number=.,Type=String,Description="TAG25">
+##INFO=<ID=TAG26,Number=.,Type=String,Description="TAG26">
+##INFO=<ID=TAG27,Number=.,Type=String,Description="TAG27">
+##INFO=<ID=TAG28,Number=.,Type=String,Description="TAG28">
+##INFO=<ID=TAG29,Number=.,Type=String,Description="TAG29">
+##INFO=<ID=TAG30,Number=.,Type=String,Description="TAG30">
+##INFO=<ID=TAG31,Number=.,Type=String,Description="TAG31">
+##INFO=<ID=TAG32,Number=.,Type=String,Description="TAG32">
+##INFO=<ID=TAG33,Number=.,Type=String,Description="TAG33">
+##INFO=<ID=TAG34,Number=.,Type=String,Description="TAG34">
+##INFO=<ID=TAG35,Number=.,Type=String,Description="TAG35">
+##INFO=<ID=TAG36,Number=.,Type=String,Description="TAG36">
+##INFO=<ID=TAG37,Number=.,Type=String,Description="TAG37">
+##INFO=<ID=TAG38,Number=.,Type=String,Description="TAG38">
+##INFO=<ID=TAG39,Number=.,Type=String,Description="TAG39">
+##INFO=<ID=TAG40,Number=.,Type=String,Description="TAG40">
+##INFO=<ID=TAG41,Number=.,Type=String,Description="TAG41">
+##INFO=<ID=TAG42,Number=.,Type=String,Description="TAG42">
+##INFO=<ID=TAG43,Number=.,Type=String,Description="TAG43">
+##INFO=<ID=TAG44,Number=.,Type=String,Description="TAG44">
+##INFO=<ID=TAG45,Number=.,Type=String,Description="TAG45">
+##INFO=<ID=TAG46,Number=.,Type=String,Description="TAG46">
+##INFO=<ID=TAG47,Number=.,Type=String,Description="TAG47">
+##INFO=<ID=TAG48,Number=.,Type=String,Description="TAG48">
+##INFO=<ID=TAG49,Number=.,Type=String,Description="TAG49">
+##INFO=<ID=TAG50,Number=.,Type=String,Description="TAG50">
+##INFO=<ID=TAG51,Number=.,Type=String,Description="TAG51">
+##INFO=<ID=TAG52,Number=.,Type=String,Description="TAG52">
+##INFO=<ID=TAG53,Number=.,Type=String,Description="TAG53">
+##INFO=<ID=TAG54,Number=.,Type=String,Description="TAG54">
+##INFO=<ID=TAG55,Number=.,Type=String,Description="TAG55">
+##INFO=<ID=TAG56,Number=.,Type=String,Description="TAG56">
+##INFO=<ID=TAG57,Number=.,Type=String,Description="TAG57">
+##INFO=<ID=TAG58,Number=.,Type=String,Description="TAG58">
+##INFO=<ID=TAG59,Number=.,Type=String,Description="TAG59">
+##INFO=<ID=TAG60,Number=.,Type=String,Description="TAG60">
+##INFO=<ID=TAG61,Number=.,Type=String,Description="TAG61">
+##INFO=<ID=TAG62,Number=.,Type=String,Description="TAG62">
+##INFO=<ID=TAG63,Number=.,Type=String,Description="TAG63">
+##INFO=<ID=TAG64,Number=.,Type=String,Description="TAG64">
+##INFO=<ID=TAG65,Number=.,Type=String,Description="TAG65">
+##INFO=<ID=TAG66,Number=.,Type=String,Description="TAG66">
+##INFO=<ID=TAG67,Number=.,Type=String,Description="TAG67">
+##INFO=<ID=TAG68,Number=.,Type=String,Description="TAG68">
+##INFO=<ID=TAG69,Number=.,Type=String,Description="TAG69">
+##INFO=<ID=TAG70,Number=.,Type=String,Description="TAG70">
+##INFO=<ID=TAG71,Number=.,Type=String,Description="TAG71">
+##INFO=<ID=TAG72,Number=.,Type=String,Description="TAG72">
+##INFO=<ID=TAG73,Number=.,Type=String,Description="TAG73">
+##INFO=<ID=TAG74,Number=.,Type=String,Description="TAG74">
+##INFO=<ID=TAG75,Number=.,Type=String,Description="TAG75">
+##INFO=<ID=TAG76,Number=.,Type=String,Description="TAG76">
+##INFO=<ID=TAG77,Number=.,Type=String,Description="TAG77">
+##INFO=<ID=TAG78,Number=.,Type=String,Description="TAG78">
+##INFO=<ID=TAG79,Number=.,Type=String,Description="TAG79">
+##INFO=<ID=TAG80,Number=.,Type=String,Description="TAG80">
+##INFO=<ID=TAG81,Number=.,Type=String,Description="TAG81">
+##INFO=<ID=TAG82,Number=.,Type=String,Description="TAG82">
+##INFO=<ID=TAG83,Number=.,Type=String,Description="TAG83">
+##INFO=<ID=TAG84,Number=.,Type=String,Description="TAG84">
+##INFO=<ID=TAG85,Number=.,Type=String,Description="TAG85">
+##INFO=<ID=TAG86,Number=.,Type=String,Description="TAG86">
+##INFO=<ID=TAG87,Number=.,Type=String,Description="TAG87">
+##INFO=<ID=TAG88,Number=.,Type=String,Description="TAG88">
+##INFO=<ID=TAG89,Number=.,Type=String,Description="TAG89">
+##INFO=<ID=TAG90,Number=.,Type=String,Description="TAG90">
+##INFO=<ID=TAG91,Number=.,Type=String,Description="TAG91">
+##INFO=<ID=TAG92,Number=.,Type=String,Description="TAG92">
+##INFO=<ID=TAG93,Number=.,Type=String,Description="TAG93">
+##INFO=<ID=TAG94,Number=.,Type=String,Description="TAG94">
+##INFO=<ID=TAG95,Number=.,Type=String,Description="TAG95">
+##INFO=<ID=TAG96,Number=.,Type=String,Description="TAG96">
+##INFO=<ID=TAG97,Number=.,Type=String,Description="TAG97">
+##INFO=<ID=TAG98,Number=.,Type=String,Description="TAG98">
+##INFO=<ID=TAG99,Number=.,Type=String,Description="TAG99">
+##INFO=<ID=TAG100,Number=.,Type=String,Description="TAG100">
+##INFO=<ID=TAG101,Number=.,Type=String,Description="TAG101">
+##INFO=<ID=TAG102,Number=.,Type=String,Description="TAG102">
+##INFO=<ID=TAG103,Number=.,Type=String,Description="TAG103">
+##INFO=<ID=TAG104,Number=.,Type=String,Description="TAG104">
+##INFO=<ID=TAG105,Number=.,Type=String,Description="TAG105">
+##INFO=<ID=TAG106,Number=.,Type=String,Description="TAG106">
+##INFO=<ID=TAG107,Number=.,Type=String,Description="TAG107">
+##INFO=<ID=TAG108,Number=.,Type=String,Description="TAG108">
+##INFO=<ID=TAG109,Number=.,Type=String,Description="TAG109">
+##INFO=<ID=TAG110,Number=.,Type=String,Description="TAG110">
+##INFO=<ID=TAG111,Number=.,Type=String,Description="TAG111">
+##INFO=<ID=TAG112,Number=.,Type=String,Description="TAG112">
+##INFO=<ID=TAG113,Number=.,Type=String,Description="TAG113">
+##INFO=<ID=TAG114,Number=.,Type=String,Description="TAG114">
+##INFO=<ID=TAG115,Number=.,Type=String,Description="TAG115">
+##INFO=<ID=TAG116,Number=.,Type=String,Description="TAG116">
+##INFO=<ID=TAG117,Number=.,Type=String,Description="TAG117">
+##INFO=<ID=TAG118,Number=.,Type=String,Description="TAG118">
+##INFO=<ID=TAG119,Number=.,Type=String,Description="TAG119">
+##INFO=<ID=TAG120,Number=.,Type=String,Description="TAG120">
+##INFO=<ID=TAG121,Number=.,Type=String,Description="TAG121">
+##INFO=<ID=TAG122,Number=.,Type=String,Description="TAG122">
+##INFO=<ID=TAG123,Number=.,Type=String,Description="TAG123">
+##INFO=<ID=TAG124,Number=.,Type=String,Description="TAG124">
+##INFO=<ID=TAG125,Number=.,Type=String,Description="TAG125">
+##INFO=<ID=TAG126,Number=.,Type=String,Description="TAG126">
+##INFO=<ID=TAG127,Number=.,Type=String,Description="TAG127">
+##INFO=<ID=TAG128,Number=.,Type=String,Description="TAG128">
+##INFO=<ID=TAG129,Number=.,Type=String,Description="TAG129">
+##INFO=<ID=TAG130,Number=.,Type=String,Description="TAG130">
+##INFO=<ID=TAG131,Number=.,Type=String,Description="TAG131">
+##INFO=<ID=TAG132,Number=.,Type=String,Description="TAG132">
+##INFO=<ID=TAG133,Number=.,Type=String,Description="TAG133">
+##INFO=<ID=TAG134,Number=.,Type=String,Description="TAG134">
+##INFO=<ID=TAG135,Number=.,Type=String,Description="TAG135">
+##INFO=<ID=TAG136,Number=.,Type=String,Description="TAG136">
+##INFO=<ID=TAG137,Number=.,Type=String,Description="TAG137">
+##INFO=<ID=TAG138,Number=.,Type=String,Description="TAG138">
+##INFO=<ID=TAG139,Number=.,Type=String,Description="TAG139">
+##INFO=<ID=TAG140,Number=.,Type=String,Description="TAG140">
+##INFO=<ID=TAG141,Number=.,Type=String,Description="TAG141">
+##INFO=<ID=TAG142,Number=.,Type=String,Description="TAG142">
+##INFO=<ID=TAG143,Number=.,Type=String,Description="TAG143">
+##INFO=<ID=TAG144,Number=.,Type=String,Description="TAG144">
+##INFO=<ID=TAG145,Number=.,Type=String,Description="TAG145">
+##INFO=<ID=TAG146,Number=.,Type=String,Description="TAG146">
+##INFO=<ID=TAG147,Number=.,Type=String,Description="TAG147">
+##INFO=<ID=TAG148,Number=.,Type=String,Description="TAG148">
+##INFO=<ID=TAG149,Number=.,Type=String,Description="TAG149">
+##INFO=<ID=TAG150,Number=.,Type=String,Description="TAG150">
+##INFO=<ID=TAG151,Number=.,Type=String,Description="TAG151">
+##INFO=<ID=TAG152,Number=.,Type=String,Description="TAG152">
+##INFO=<ID=TAG153,Number=.,Type=String,Description="TAG153">
+##INFO=<ID=TAG154,Number=.,Type=String,Description="TAG154">
+##INFO=<ID=TAG155,Number=.,Type=String,Description="TAG155">
+##INFO=<ID=TAG156,Number=.,Type=String,Description="TAG156">
+##INFO=<ID=TAG157,Number=.,Type=String,Description="TAG157">
+##INFO=<ID=TAG158,Number=.,Type=String,Description="TAG158">
+##INFO=<ID=TAG159,Number=.,Type=String,Description="TAG159">
+##INFO=<ID=TAG160,Number=.,Type=String,Description="TAG160">
+##INFO=<ID=TAG161,Number=.,Type=String,Description="TAG161">
+##INFO=<ID=TAG162,Number=.,Type=String,Description="TAG162">
+##INFO=<ID=TAG163,Number=.,Type=String,Description="TAG163">
+##INFO=<ID=TAG164,Number=.,Type=String,Description="TAG164">
+##INFO=<ID=TAG165,Number=.,Type=String,Description="TAG165">
+##INFO=<ID=TAG166,Number=.,Type=String,Description="TAG166">
+##INFO=<ID=TAG167,Number=.,Type=String,Description="TAG167">
+##INFO=<ID=TAG168,Number=.,Type=String,Description="TAG168">
+##INFO=<ID=TAG169,Number=.,Type=String,Description="TAG169">
+##INFO=<ID=TAG170,Number=.,Type=String,Description="TAG170">
+##INFO=<ID=TAG171,Number=.,Type=String,Description="TAG171">
+##INFO=<ID=TAG172,Number=.,Type=String,Description="TAG172">
+##INFO=<ID=TAG173,Number=.,Type=String,Description="TAG173">
+##INFO=<ID=TAG174,Number=.,Type=String,Description="TAG174">
+##INFO=<ID=TAG175,Number=.,Type=String,Description="TAG175">
+##INFO=<ID=TAG176,Number=.,Type=String,Description="TAG176">
+##INFO=<ID=TAG177,Number=.,Type=String,Description="TAG177">
+##INFO=<ID=TAG178,Number=.,Type=String,Description="TAG178">
+##INFO=<ID=TAG179,Number=.,Type=String,Description="TAG179">
+##INFO=<ID=TAG180,Number=.,Type=String,Description="TAG180">
+##INFO=<ID=TAG181,Number=.,Type=String,Description="TAG181">
+##INFO=<ID=TAG182,Number=.,Type=String,Description="TAG182">
+##INFO=<ID=TAG183,Number=.,Type=String,Description="TAG183">
+##INFO=<ID=TAG184,Number=.,Type=String,Description="TAG184">
+##INFO=<ID=TAG185,Number=.,Type=String,Description="TAG185">
+##INFO=<ID=TAG186,Number=.,Type=String,Description="TAG186">
+##INFO=<ID=TAG187,Number=.,Type=String,Description="TAG187">
+##INFO=<ID=TAG188,Number=.,Type=String,Description="TAG188">
+##INFO=<ID=TAG189,Number=.,Type=String,Description="TAG189">
+##INFO=<ID=TAG190,Number=.,Type=String,Description="TAG190">
+##INFO=<ID=TAG191,Number=.,Type=String,Description="TAG191">
+##INFO=<ID=TAG192,Number=.,Type=String,Description="TAG192">
+##INFO=<ID=TAG193,Number=.,Type=String,Description="TAG193">
+##INFO=<ID=TAG194,Number=.,Type=String,Description="TAG194">
+##INFO=<ID=TAG195,Number=.,Type=String,Description="TAG195">
+##INFO=<ID=TAG196,Number=.,Type=String,Description="TAG196">
+##INFO=<ID=TAG197,Number=.,Type=String,Description="TAG197">
+##INFO=<ID=TAG198,Number=.,Type=String,Description="TAG198">
+##INFO=<ID=TAG199,Number=.,Type=String,Description="TAG199">
+##INFO=<ID=TAG200,Number=.,Type=String,Description="TAG200">
+##INFO=<ID=TAG201,Number=.,Type=String,Description="TAG201">
+##INFO=<ID=TAG202,Number=.,Type=String,Description="TAG202">
+##INFO=<ID=TAG203,Number=.,Type=String,Description="TAG203">
+##INFO=<ID=TAG204,Number=.,Type=String,Description="TAG204">
+##INFO=<ID=TAG205,Number=.,Type=String,Description="TAG205">
+##INFO=<ID=TAG206,Number=.,Type=String,Description="TAG206">
+##INFO=<ID=TAG207,Number=.,Type=String,Description="TAG207">
+##INFO=<ID=TAG208,Number=.,Type=String,Description="TAG208">
+##INFO=<ID=TAG209,Number=.,Type=String,Description="TAG209">
+##INFO=<ID=TAG210,Number=.,Type=String,Description="TAG210">
+##INFO=<ID=TAG211,Number=.,Type=String,Description="TAG211">
+##INFO=<ID=TAG212,Number=.,Type=String,Description="TAG212">
+##INFO=<ID=TAG213,Number=.,Type=String,Description="TAG213">
+##INFO=<ID=TAG214,Number=.,Type=String,Description="TAG214">
+##INFO=<ID=TAG215,Number=.,Type=String,Description="TAG215">
+##INFO=<ID=TAG216,Number=.,Type=String,Description="TAG216">
+##INFO=<ID=TAG217,Number=.,Type=String,Description="TAG217">
+##INFO=<ID=TAG218,Number=.,Type=String,Description="TAG218">
+##INFO=<ID=TAG219,Number=.,Type=String,Description="TAG219">
+##INFO=<ID=TAG220,Number=.,Type=String,Description="TAG220">
+##INFO=<ID=TAG221,Number=.,Type=String,Description="TAG221">
+##INFO=<ID=TAG222,Number=.,Type=String,Description="TAG222">
+##INFO=<ID=TAG223,Number=.,Type=String,Description="TAG223">
+##INFO=<ID=TAG224,Number=.,Type=String,Description="TAG224">
+##INFO=<ID=TAG225,Number=.,Type=String,Description="TAG225">
+##INFO=<ID=TAG226,Number=.,Type=String,Description="TAG226">
+##INFO=<ID=TAG227,Number=.,Type=String,Description="TAG227">
+##INFO=<ID=TAG228,Number=.,Type=String,Description="TAG228">
+##INFO=<ID=TAG229,Number=.,Type=String,Description="TAG229">
+##INFO=<ID=TAG230,Number=.,Type=String,Description="TAG230">
+##INFO=<ID=TAG231,Number=.,Type=String,Description="TAG231">
+##INFO=<ID=TAG232,Number=.,Type=String,Description="TAG232">
+##INFO=<ID=TAG233,Number=.,Type=String,Description="TAG233">
+##INFO=<ID=TAG234,Number=.,Type=String,Description="TAG234">
+##INFO=<ID=TAG235,Number=.,Type=String,Description="TAG235">
+##INFO=<ID=TAG236,Number=.,Type=String,Description="TAG236">
+##INFO=<ID=TAG237,Number=.,Type=String,Description="TAG237">
+##INFO=<ID=TAG238,Number=.,Type=String,Description="TAG238">
+##INFO=<ID=TAG239,Number=.,Type=String,Description="TAG239">
+##INFO=<ID=TAG240,Number=.,Type=String,Description="TAG240">
+##INFO=<ID=TAG241,Number=.,Type=String,Description="TAG241">
+##INFO=<ID=TAG242,Number=.,Type=String,Description="TAG242">
+##INFO=<ID=TAG243,Number=.,Type=String,Description="TAG243">
+##INFO=<ID=TAG244,Number=.,Type=String,Description="TAG244">
+##INFO=<ID=TAG245,Number=.,Type=String,Description="TAG245">
+##INFO=<ID=TAG246,Number=.,Type=String,Description="TAG246">
+##INFO=<ID=TAG247,Number=.,Type=String,Description="TAG247">
+##INFO=<ID=TAG248,Number=.,Type=String,Description="TAG248">
+##INFO=<ID=TAG249,Number=.,Type=String,Description="TAG249">
+##INFO=<ID=TAG250,Number=.,Type=String,Description="TAG250">
+##INFO=<ID=TAG251,Number=.,Type=String,Description="TAG251">
+##INFO=<ID=TAG252,Number=.,Type=String,Description="TAG252">
+##INFO=<ID=TAG253,Number=.,Type=String,Description="TAG253">
+##INFO=<ID=TAG254,Number=.,Type=String,Description="TAG254">
+##INFO=<ID=TAG255,Number=.,Type=String,Description="TAG255">
+##INFO=<ID=TAG256,Number=.,Type=String,Description="TAG256">
+##INFO=<ID=TAG257,Number=.,Type=String,Description="TAG257">
+##INFO=<ID=TAG258,Number=.,Type=String,Description="TAG258">
+##INFO=<ID=TAG259,Number=.,Type=String,Description="TAG259">
+##INFO=<ID=TAG260,Number=.,Type=String,Description="TAG260">
+##INFO=<ID=TAG261,Number=.,Type=String,Description="TAG261">
+##INFO=<ID=TAG262,Number=.,Type=String,Description="TAG262">
+##INFO=<ID=TAG263,Number=.,Type=String,Description="TAG263">
+##INFO=<ID=TAG264,Number=.,Type=String,Description="TAG264">
+##INFO=<ID=TAG265,Number=.,Type=String,Description="TAG265">
+##INFO=<ID=TAG266,Number=.,Type=String,Description="TAG266">
+##INFO=<ID=TAG267,Number=.,Type=String,Description="TAG267">
+##INFO=<ID=TAG268,Number=.,Type=String,Description="TAG268">
+##INFO=<ID=TAG269,Number=.,Type=String,Description="TAG269">
+##INFO=<ID=TAG270,Number=.,Type=String,Description="TAG270">
+##INFO=<ID=TAG271,Number=.,Type=String,Description="TAG271">
+##INFO=<ID=TAG272,Number=.,Type=String,Description="TAG272">
+##INFO=<ID=TAG273,Number=.,Type=String,Description="TAG273">
+##INFO=<ID=TAG274,Number=.,Type=String,Description="TAG274">
+##INFO=<ID=TAG275,Number=.,Type=String,Description="TAG275">
+##INFO=<ID=TAG276,Number=.,Type=String,Description="TAG276">
+##INFO=<ID=TAG277,Number=.,Type=String,Description="TAG277">
+##INFO=<ID=TAG278,Number=.,Type=String,Description="TAG278">
+##INFO=<ID=TAG279,Number=.,Type=String,Description="TAG279">
+##INFO=<ID=TAG280,Number=.,Type=String,Description="TAG280">
+##INFO=<ID=TAG281,Number=.,Type=String,Description="TAG281">
+##INFO=<ID=TAG282,Number=.,Type=String,Description="TAG282">
+##INFO=<ID=TAG283,Number=.,Type=String,Description="TAG283">
+##INFO=<ID=TAG284,Number=.,Type=String,Description="TAG284">
+##INFO=<ID=TAG285,Number=.,Type=String,Description="TAG285">
+##INFO=<ID=TAG286,Number=.,Type=String,Description="TAG286">
+##INFO=<ID=TAG287,Number=.,Type=String,Description="TAG287">
+##INFO=<ID=TAG288,Number=.,Type=String,Description="TAG288">
+##INFO=<ID=TAG289,Number=.,Type=String,Description="TAG289">
+##INFO=<ID=TAG290,Number=.,Type=String,Description="TAG290">
+##INFO=<ID=TAG291,Number=.,Type=String,Description="TAG291">
+##INFO=<ID=TAG292,Number=.,Type=String,Description="TAG292">
+##INFO=<ID=TAG293,Number=.,Type=String,Description="TAG293">
+##INFO=<ID=TAG294,Number=.,Type=String,Description="TAG294">
+##INFO=<ID=TAG295,Number=.,Type=String,Description="TAG295">
+##INFO=<ID=TAG296,Number=.,Type=String,Description="TAG296">
+##INFO=<ID=TAG297,Number=.,Type=String,Description="TAG297">
+##INFO=<ID=TAG298,Number=.,Type=String,Description="TAG298">
+##INFO=<ID=TAG299,Number=.,Type=String,Description="TAG299">
+##contig=<ID=chr1,length=249250621>
+##contig=<ID=chr2,length=243199373>
+##contig=<ID=chr3,length=198022430>
+##contig=<ID=chr4,length=191154276>
+##contig=<ID=chr5,length=180915260>
+##contig=<ID=chr6,length=171115067>
+##contig=<ID=chr7,length=159138663>
+##contig=<ID=chr8,length=146364022>
+##contig=<ID=chr9,length=141213431>
+##contig=<ID=chr10,length=135534747>
+##contig=<ID=chr11,length=135006516>
+##contig=<ID=chr12,length=133851895>
+##contig=<ID=chr13,length=115169878>
+##contig=<ID=chr14,length=107349540>
+##contig=<ID=chr15,length=102531392>
+##contig=<ID=chr16,length=90354753>
+##contig=<ID=chr17,length=81195210>
+##contig=<ID=chr18,length=78077248>
+##contig=<ID=chr19,length=59128983>
+##contig=<ID=chr20,length=63025520>
+##contig=<ID=chr21,length=48129895>
+##contig=<ID=chr22,length=51304566>
+##contig=<ID=chrX,length=155270560>
+##contig=<ID=chrY,length=59373566>
+##contig=<ID=chrMT,length=16569>
+##contig=<ID=GL000207.1,length=4262>
+##contig=<ID=GL000226.1,length=15008>
+##contig=<ID=GL000229.1,length=19913>
+##contig=<ID=GL000231.1,length=27386>
+##contig=<ID=GL000210.1,length=27682>
+##contig=<ID=GL000239.1,length=33824>
+##contig=<ID=GL000235.1,length=34474>
+##contig=<ID=GL000201.1,length=36148>
+##contig=<ID=GL000247.1,length=36422>
+##contig=<ID=GL000245.1,length=36651>
+##contig=<ID=GL000197.1,length=37175>
+##contig=<ID=GL000203.1,length=37498>
+##contig=<ID=GL000246.1,length=38154>
+##contig=<ID=GL000249.1,length=38502>
+##contig=<ID=GL000196.1,length=38914>
+##contig=<ID=GL000248.1,length=39786>
+##contig=<ID=GL000244.1,length=39929>
+##contig=<ID=GL000238.1,length=39939>
+##contig=<ID=GL000202.1,length=40103>
+##contig=<ID=GL000234.1,length=40531>
+##contig=<ID=GL000232.1,length=40652>
+##contig=<ID=GL000206.1,length=41001>
+##contig=<ID=GL000240.1,length=41933>
+##contig=<ID=GL000236.1,length=41934>
+##contig=<ID=GL000241.1,length=42152>
+##contig=<ID=GL000243.1,length=43341>
+##contig=<ID=GL000242.1,length=43523>
+##contig=<ID=GL000230.1,length=43691>
+##contig=<ID=GL000237.1,length=45867>
+##contig=<ID=GL000233.1,length=45941>
+##contig=<ID=GL000204.1,length=81310>
+##contig=<ID=GL000198.1,length=90085>
+##contig=<ID=GL000208.1,length=92689>
+##contig=<ID=GL000191.1,length=106433>
+##contig=<ID=GL000227.1,length=128374>
+##contig=<ID=GL000228.1,length=129120>
+##contig=<ID=GL000214.1,length=137718>
+##contig=<ID=GL000221.1,length=155397>
+##contig=<ID=GL000209.1,length=159169>
+##contig=<ID=GL000218.1,length=161147>
+##contig=<ID=GL000220.1,length=161802>
+##contig=<ID=GL000213.1,length=164239>
+##contig=<ID=GL000211.1,length=166566>
+##contig=<ID=GL000199.1,length=169874>
+##contig=<ID=GL000217.1,length=172149>
+##contig=<ID=GL000216.1,length=172294>
+##contig=<ID=GL000215.1,length=172545>
+##contig=<ID=GL000205.1,length=174588>
+##contig=<ID=GL000219.1,length=179198>
+##contig=<ID=GL000224.1,length=179693>
+##contig=<ID=GL000223.1,length=180455>
+##contig=<ID=GL000195.1,length=182896>
+##contig=<ID=GL000212.1,length=186858>
+##contig=<ID=GL000222.1,length=186861>
+##contig=<ID=GL000200.1,length=187035>
+##contig=<ID=GL000193.1,length=189789>
+##contig=<ID=GL000194.1,length=191469>
+##contig=<ID=GL000225.1,length=211173>
+##contig=<ID=GL000192.1,length=547496>
+##contig=<ID=NC_007605,length=171823>
+##contig=<ID=hs37d5,length=35477943>
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	S1	S2	S3
+chr1	172997040	rs6708019	AAAAAA	C	.	BAD_SO;GNOMAD_GENOME_BAD_AF	AC=1;AC_TOMMO=1794;AF=0.125;AF_TOMMO=0.107;DB;AN=8;ANN=C|intergenic_region|MODIFIER|AC104801.1-snoU13|ENSG00000236651-ENSG00000238572|intergenic_region|ENSG00000236651-ENSG00000238572|||n.172997040A>C||||||;AN_TOMMO=16760;BaseQRankSum=5.967;CADD_PHRED=1.917;CADD_SCORE=-0.051955;CSQ=C|intergenic_variant|MODIFIER|||||||||||||||||||||||;DB;DP=858;ExcessHet=3.0103;FS=0;IN_GNOMAD_GENOME;IN_TOMMO;MLEAC=1;MLEAF=0.125;MQ=60;MQRankSum=0;N_GNOMAD_EXOME=0;N_GNOMAD_GENOME=1;POLYX=2;QD=11.63;REGULATORY_FEAT=promoter_flanking_region;ReadPosRankSum=0.896;SOR=0.843;gnomad_exome_AF_POPMAX=0;gnomad_genome_AF_POPMAX=0.28	GT:FT	./.:PASS	1/1:.	0/1:BAD
+chr2	172997040	rs6708019	AAAAAA	C	.	BAD_SO;GNOMAD_GENOME_BAD_AF	AC=1;AC_TOMMO=1794;AF=0.125;AF_TOMMO=0.107;DB;AN=8;ANN=C|intergenic_region|MODIFIER|AC104801.1-snoU13|ENSG00000236651-ENSG00000238572|intergenic_region|ENSG00000236651-ENSG00000238572|||n.172997040A>C||||||;AN_TOMMO=16760;BaseQRankSum=5.967;CADD_PHRED=1.917;CADD_SCORE=-0.051955;CSQ=C|intergenic_variant|MODIFIER|||||||||||||||||||||||;DB;DP=858;ExcessHet=3.0103;FS=0;IN_GNOMAD_GENOME;IN_TOMMO;MLEAC=1;MLEAF=0.125;MQ=60;MQRankSum=0;N_GNOMAD_EXOME=0;N_GNOMAD_GENOME=1;POLYX=2;QD=11.63;REGULATORY_FEAT=promoter_flanking_region;ReadPosRankSum=0.896;SOR=0.843;gnomad_exome_AF_POPMAX=0;gnomad_genome_AF_POPMAX=0.28	GT	./.	1/1	1|1
+chr3	172997088	rs13021554	T	C	12523.3	.	AC=4;AC_TOMMO=3801;AF=0.5;AF_TOMMO=0.2268;AN=8;ANN=C|intergenic_region|MODIFIER|AC104801.1-snoU13|ENSG00000236651-ENSG00000238572|intergenic_region|ENSG00000236651-ENSG00000238572|||n.172997088T>C||||||;AN_TOMMO=16760;BaseQRankSum=9.342;CADD_PHRED=1.032;CADD_SCORE=-0.14604;CSQ=C|intergenic_variant|MODIFIER|||||||||||||||||||||||;DB;DP=921;ExcessHet=9.4201;FS=0.52;IN_GNOMAD_GENOME;IN_TOMMO;MLEAC=4;MLEAF=0.5;MQ=60;MQRankSum=0;N_GNOMAD_EXOME=0;N_GNOMAD_GENOME=1;POLYX=2;QD=14.2;REGULATORY_FEAT=promoter_flanking_region;ReadPosRankSum=1.158;SOR=0.638;gnomad_exome_AF_POPMAX=0;gnomad_genome_AF_POPMAX=0.583	GT	0/0	1|1	1/.
+chr4	172997337	rs11675761	C	T,G	1176.75	BAD_SO;GNOMAD_GENOME_BAD_AF	AC=1;AC_TOMMO=1795;AF=0.125;AF_TOMMO=0.1071;AN=8;ANN=T|intergenic_region|MODIFIER|AC104801.1-snoU13|ENSG00000236651-ENSG00000238572|intergenic_region|ENSG00000236651-ENSG00000238572|||n.172997337C>T||||||;AN_TOMMO=16760;BaseQRankSum=-4.524;CADD_PHRED=0.773;CADD_SCORE=-0.189058;CSQ=T|intergenic_variant|MODIFIER|||||||||||||||||||||||;DB;DP=411;ExcessHet=3.0103;FS=1.248;IN_GNOMAD_GENOME;IN_TOMMO;MLEAC=1;MLEAF=0.125;MQ=60;MQRankSum=0;N_GNOMAD_EXOME=0;N_GNOMAD_GENOME=1;POLYX=1;QD=12.93;REGULATORY_FEAT=promoter_flanking_region;ReadPosRankSum=-0.841;SOR=0.581;gnomad_exome_AF_POPMAX=0;gnomad_genome_AF_POPMAX=0.279	GT	1	2	1
+chr5	172997482	rs11681688	T	C,G,A	1107.75	BAD_SO;GNOMAD_GENOME_BAD_AF	AC=1;AC_TOMMO=1795;AF=0.125;AF_TOMMO=0.1071;AN=8;ANN=C|intergenic_region|MODIFIER|AC104801.1-snoU13|ENSG00000236651-ENSG00000238572|intergenic_region|ENSG00000236651-ENSG00000238572|||n.172997482T>C||||||;AN_TOMMO=16760;BaseQRankSum=3.84;CADD_PHRED=4.508;CADD_SCORE=0.114843;CSQ=C|intergenic_variant|MODIFIER|||||||||||||||||||||||;DB;DP=376;ExcessHet=3.0103;FS=4.202;IN_GNOMAD_GENOME;IN_TOMMO;MLEAC=1;MLEAF=0.125;MQ=60;MQRankSum=0;N_GNOMAD_EXOME=0;N_GNOMAD_GENOME=1;POLYX=4;QD=14.2;REGULATORY_FEAT=promoter_flanking_region;ReadPosRankSum=0.615;SOR=0.838;gnomad_exome_AF_POPMAX=0;gnomad_genome_AF_POPMAX=0.279	GT	1/1/3	0|1|2	0/1	./1
+chr5	172997483	.	T	CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA	1107.75	.	.	GT	1/1/3	0|1|2	0/1	./1

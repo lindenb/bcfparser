@@ -1,0 +1,10 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+<suite name="VCF" verbose="1">
+
+  <test name="Regression1">
+    <classes>
+      <class name="com.github.lindenb.jvarkit.variant.bcf.BCFCodecTest"/>
+    </classes>
+  </test>
+</suite>
+
