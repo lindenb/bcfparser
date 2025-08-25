@@ -1,9 +1,15 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 <suite name="VCF" verbose="1">
 
-  <test name="Regression1">
+  <test name="Regression1" enabled="false">
     <classes>
-      <class name="com.github.lindenb.jvarkit.variant.bcf.BCFCodecTest"/>
+      <class name="com.github.lindenb.jvarkit.variant.bcf.BCFCodecTest" />
+    </classes>
+  </test>
+  
+    <test name="Regression2" enabled="true">
+    <classes>
+      <class name="com.github.lindenb.jvarkit.variant.bcf.BCFFileReaderTest"/>
     </classes>
   </test>
 </suite>

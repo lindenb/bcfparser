@@ -1,13 +1,10 @@
 package com.github.lindenb.jvarkit.variant.bcf;
 
-import com.github.lindenb.jvarkit.variant.bcf.BCFTypedData;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -25,7 +22,6 @@ import htsjdk.tribble.readers.LineIteratorImpl;
 import htsjdk.tribble.readers.PositionalBufferedStream;
 import htsjdk.tribble.readers.SynchronousLineReader;
 import htsjdk.variant.variantcontext.Allele;
-import htsjdk.variant.variantcontext.Genotype;
 import htsjdk.variant.variantcontext.GenotypeBuilder;
 import htsjdk.variant.variantcontext.VariantContext;
 import htsjdk.variant.variantcontext.VariantContextBuilder;
@@ -36,7 +32,6 @@ import htsjdk.variant.vcf.VCFFilterHeaderLine;
 import htsjdk.variant.vcf.VCFFormatHeaderLine;
 import htsjdk.variant.vcf.VCFHeader;
 import htsjdk.variant.vcf.VCFHeaderLine;
-import htsjdk.variant.vcf.VCFIDHeaderLine;
 import htsjdk.variant.vcf.VCFInfoHeaderLine;
 
 public class BCFCodec extends BinaryFeatureCodec<VariantContext> {
@@ -99,7 +94,7 @@ public class BCFCodec extends BinaryFeatureCodec<VariantContext> {
 		    	this.idx2word.add(s);
 		    	seen.add(s);
 		    	}
-		    
+		    System.err.println("codec.POSITION="+in.getPosition());
 		    return new FeatureCodecHeader(header, in.getPosition());
 			}
 		
