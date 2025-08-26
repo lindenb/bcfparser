@@ -1,9 +1,35 @@
+/*
+The MIT License (MIT)
+
+Copyright (c) 2025 Pierre Lindenbaum
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+*/
 package com.github.lindenb.jvarkit.variant.bcf;
 
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,31 +45,35 @@ import htsjdk.variant.vcf.VCFHeader;
 
 public class BCFFileReaderTest {
 	@DataProvider(name = "src1")
-	public Object[][] createData1() {
-		return new Object[][] {
-			{"testdata/test01.bcf","testdata/test01.vcf"}
-			};
+	public Iterator<Object[]> createData1() {
+		return BCFCodecTest.listVCFsFortest();
 		}
 	
 	@DataProvider(name = "src2")
-	public Object[][] createData2() {
-		return new Object[][] {
-			{"chr1",1,100000000},
-			{"chr5",1,1000000000}
-			};
+	public Iterator<Object[]>  createData2() {
+		return Arrays.asList(
+			new Object[]{"chr1",1,100000000},
+			new Object[]{"chr5",1,1000000000}
+			).iterator();
 		}
 	
 	@DataProvider(name = "src3")
 	public Object[][] createData3() {
-		Object[][] o1=createData1();
-		Object[][] o2=createData2();
+		Iterator<Object[]> iter =createData1();
+		List<Object[]> L1= new ArrayList<>();
+		while(iter.hasNext()) L1.add(iter.next());
+		
+		iter =createData2();
+		List<Object[]> L2= new ArrayList<>();
+		while(iter.hasNext()) L2.add(iter.next());
+		
 		List<Object[]> L=new ArrayList<>();
-		for(int x=0;x< o1.length;x++) {
-			for(int y=0;y< o2.length;y++) {
-				List<Object> L2=new ArrayList<>();
-				for(Object i:o1[x]) L2.add(i);
-				for(Object i:o2[y]) L2.add(i);
-				L.add(L2.toArray(new Object[L2.size()]));
+		for(Object[] i1:L1 ) {
+			for(Object[] i2:L2) {
+				List<Object> L4=new ArrayList<>();
+				for(Object i:i1) L4.add(i);
+				for(Object i:i2) L4.add(i);
+				L.add(L4.toArray(new Object[L4.size()]));
 				}
 			}
 		Object[][] o3= new Object[L.size()][];

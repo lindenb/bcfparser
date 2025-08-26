@@ -1,3 +1,28 @@
+/*
+The MIT License (MIT)
+
+Copyright (c) 2025 Pierre Lindenbaum
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+*/
 package com.github.lindenb.jvarkit.variant.bcf;
 
 import java.io.ByteArrayInputStream;
@@ -5,44 +30,26 @@ import java.io.Closeable;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PushbackInputStream;
-import java.nio.channels.SeekableByteChannel;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.zip.GZIPInputStream;
 
-import htsjdk.io.HtsPath;
 import htsjdk.samtools.SAMSequenceRecord;
 import htsjdk.samtools.seekablestream.ISeekableStreamFactory;
 import htsjdk.samtools.seekablestream.SeekableStream;
 import htsjdk.samtools.seekablestream.SeekableStreamFactory;
 import htsjdk.samtools.util.BinaryCodec;
 import htsjdk.samtools.util.BlockCompressedInputStream;
-import htsjdk.samtools.util.FileExtensions;
-import htsjdk.samtools.util.IOUtil;
 import htsjdk.samtools.util.Interval;
 import htsjdk.samtools.util.Locatable;
 import htsjdk.samtools.util.Log;
-import htsjdk.samtools.util.RuntimeEOFException;
-import htsjdk.samtools.util.RuntimeIOException;
-import htsjdk.tribble.BinaryFeatureCodec;
-import htsjdk.tribble.Feature;
-import htsjdk.tribble.FeatureCodecHeader;
-import htsjdk.tribble.SimpleFeature;
 import htsjdk.tribble.readers.LineIterator;
 import htsjdk.tribble.readers.LineIteratorImpl;
 import htsjdk.tribble.readers.PositionalBufferedStream;
 import htsjdk.tribble.readers.SynchronousLineReader;
-import htsjdk.tribble.readers.TabixReader;
 import htsjdk.variant.bcf2.BCFVersion;
 import htsjdk.variant.variantcontext.Allele;
 import htsjdk.variant.variantcontext.GenotypeBuilder;
@@ -55,13 +62,11 @@ import htsjdk.variant.vcf.VCFFilterHeaderLine;
 import htsjdk.variant.vcf.VCFFormatHeaderLine;
 import htsjdk.variant.vcf.VCFHeader;
 import htsjdk.variant.vcf.VCFHeaderLine;
+import htsjdk.variant.vcf.VCFHeaderLineType;
 import htsjdk.variant.vcf.VCFInfoHeaderLine;
 
 public class BCFCodec implements Closeable {
 	private static final String HTS_IDX_DELIM = "##idx##";
-    private  String mFilePath;
-    private  String mIndexPath;
-    private  Function<SeekableByteChannel, SeekableByteChannel> mIndexWrapper;
     private  InputStream mInputStream;    
 	private static final Log LOG=Log.getInstance(BCFCodec.class);
 	public static final byte[] MAGIC_HEADER_START = "BCF".getBytes();
@@ -191,6 +196,7 @@ public class BCFCodec implements Closeable {
 			@SuppressWarnings("resource")
 			final BinaryCodec binaryCodec1 = new BinaryCodec(mInputStream);
 			final int to_info_length ;
+			
 			final List<Allele> alleles;
 			try {
 				to_info_length=readInfoLength(binaryCodec1);
@@ -198,9 +204,9 @@ public class BCFCodec implements Closeable {
 			catch(EOFException err) {
 				return null;
 				}		
-			System.err.println(to_info_length);
+			LOG.debug(to_info_length);
 			int format_length = uint32ToInt(binaryCodec1.readUInt());
-			System.err.println(format_length);
+			LOG.debug(format_length);
 
 			
 			final VariantContextBuilder vcb=new VariantContextBuilder();
@@ -215,49 +221,53 @@ public class BCFCodec implements Closeable {
 				vcb.start(interval.getStart());
 				vcb.stop(interval.getEnd());
 				
-				System.err.println("interval= "+interval);
+				LOG.debug("interval= "+interval);
 				
+				/** QUAL ********************************************/
 				float qual= bc2.readFloat();
-				if(qual==0x7F800001) qual=-1f;
-				System.err.println("qual="+qual);
+				if(!Float.isNaN(qual) && qual!=BCFTypedData.bcf_float_missing) {
+					LOG.debug("qual ok="+qual);
+					vcb.log10PError(qual/-10);
+					}
+				LOG.debug("qual="+qual);
 				
 				int n_info = bc2.readUShort();
-				System.err.println("n_info="+n_info);
+				LOG.debug("n_info="+n_info);
 				int n_allele = bc2.readUShort();
-				System.err.println("n_allele="+n_allele);
+				LOG.debug("n_allele="+n_allele);
 				
 				// n samples is in 3 bytes but should be the same as header.n_samples
 				bc2.readByte();bc2.readByte();bc2.readByte();
 				int n_samples= this.header.getNGenotypeSamples();
-				System.err.println("n_samples"+n_samples);
+				LOG.debug("n_samples"+n_samples);
 				for(GenotypeBuilder gb:this.genotypeBuilers) {
 					gb.reset(true);//keep sample name
 					//gb.unfiltered();
 					}
 				
 				n_fmt = bc2.readUByte();
-				System.err.println("n_fmt="+n_fmt);
+				LOG.debug("n_fmt="+n_fmt);
 
 				/** ID **/
-				System.err.println("read ID");
+				LOG.debug("read ID");
 				final String id = BCFTypedData.readString(bc2);
 				if(id!=null && !id.isEmpty()) {
-					System.err.println("ID "+id);
+					LOG.debug("ID "+id);
 					vcb.id(id);
 					}
 				
 				/** ALLELES **/
-				System.err.println("n-Alleles "+n_allele);
+				LOG.debug("n-Alleles "+n_allele);
 				alleles=new ArrayList<>(n_allele);
 				for(int i=0;i< n_allele;i++) {
 					final Allele a= Allele.create(BCFTypedData.readString(bc2), i==0);
-					System.err.println("allele["+i+"]="+a);
+					LOG.debug("allele["+i+"]="+a);
 					alleles.add(a);
 					}
 				vcb.alleles(alleles);
 				
 				/** FILTERS **/
-				System.err.println("read filters...");
+				LOG.debug("read filters...");
 				int[] filter_idx=BCFTypedData.readIntArray(bc2);
 				if(filter_idx!=null && filter_idx.length==1 && filter_idx[0]==0/* PASS is always Oth item */ ) {
 					vcb.passFilters();
@@ -266,24 +276,59 @@ public class BCFCodec implements Closeable {
 					vcb.filters(Arrays.stream(filter_idx).mapToObj(it->idx2word.get(it)).collect(Collectors.toSet()));
 					}
 				
-				System.err.println(Arrays.toString(filter_idx));
-				System.err.println();
+				LOG.debug(Arrays.toString(filter_idx));
+				LOG.debug();
 				
-				System.err.println("read info...");
+				LOG.debug("read info...");
 				/** INFO */
 				for(int i=0;i< n_info;++i) {
 					int tag_id = BCFTypedData.read(bc2).intValue();
-					System.err.println("tag_id="+tag_id);
-					System.err.println("tag="+idx2word.get(tag_id));
+					LOG.debug("tag_id="+tag_id);
+					LOG.debug("tag="+idx2word.get(tag_id));
 					BCFTypedData td=BCFTypedData.read(bc2);
 					final String tag=idx2word.get(tag_id);
-					System.err.println("INFO/"+tag + "= "+td);
+					final VCFInfoHeaderLine hinfo= this.header.getInfoHeaderLine(tag);
+					if(hinfo==null) throw new IllegalStateException();
+					LOG.debug("INFO/"+tag + "= "+td);
+					//Object value= BCFTypedData.convertToVCFtype(hinfo.getType(), td.getValue());
 					Object value= td.getValue();
-					if(value==null) value=Boolean.TRUE;//FLAG
+					
+					
+					
+					if(value instanceof String && hinfo.getType()==VCFHeaderLineType.String) {
+						String[] ss= String.class.cast(value).split("[,]");
+						if(ss.length==1) {
+							value=ss[0];
+							}
+						else
+							{
+							value=Arrays.asList(ss);
+							}
+						}
+					
+					else if(value instanceof List && List.class.cast(value).size()==1) {
+						value= List.class.cast(value).get(0);
+						}
+					
+					else if(value==null) value=Boolean.TRUE;//FLAG
+					
+					
+					
 					vcb.attribute(tag, value);
+					
+					
+					/*
+					if(tag.equals("SVLEN")) System.err.println("SVLEN="+td+" "+interval);
+					if(tag.equals("SVLEN") && interval.getStart()==interval.getEnd() && td.getCount()==1) {
+						int svlen = Math.abs(Integer.parseInt(value.toString()));
+						System.err.println("SVLEN="+td+" stop="+(interval.getEnd()+svlen-1));
+						vcb.stop(interval.getEnd()+svlen-1);
+						}*/
+					
+
 					}
 				}
-			System.err.println("Attributes = #####################################################");
+			LOG.debug("Attributes = #####################################################");
 			fillBuffer(binaryCodec1,format_length);
 			
 			try(ByteArrayInputStream is=new ByteArrayInputStream(this.buffer,0,format_length)) {
@@ -292,8 +337,10 @@ public class BCFCodec implements Closeable {
 				for(int i=0;i< n_fmt;i++) {
 					int tag_id = BCFTypedData.read(bc2).intValue();
 					final String tag = idx2word.get(tag_id);
+					final VCFFormatHeaderLine hFmtLine= super.header.getFormatHeaderLine(tag);
+					if(hFmtLine==null) throw new IllegalArgumentException("FORMAT/"+tag+" used but not defined int header");
 					final byte b= bc2.readByte();
-					System.err.println("FORMAT/"+tag +" has fmt_type="+BCFTypedData.decodeType(b));
+					LOG.debug("FORMAT/"+tag +" has fmt_type="+BCFTypedData.decodeType(b));
 					int n_element= BCFTypedData.decodeCount(bc2,b);
 					BCFTypedData.Type type = BCFTypedData.decodeType(b);
 					for(int x=0;x< this.header.getNGenotypeSamples();++x) {
@@ -304,19 +351,19 @@ public class BCFCodec implements Closeable {
 						
 						if(BCFTypedData.decodeType(b).equals(BCFTypedData.Type.CHAR)) {
 							final String s=BCFTypedData.readString(bc2,n_element);
-							System.err.println("add string for "+tag +" length="+n_element+" value="+s);
+							LOG.debug("add string for "+tag +" length="+n_element+" value="+s);
 							gt_values.add(s);
 							}
 						else {
 							for(int j=0;j< n_element;++j) {
 								final Object o = BCFTypedData.readAtomic(bc2,type);
 								if(o.equals(type.getEndVector())) {
-									System.err.println("end vector, break v="+o+" "+type.getEndVector()+"/"+type.getMissing());
+									LOG.debug("end vector, break v="+o+" "+type.getEndVector()+"/"+type.getMissing());
 									break;
 									}
 								if(o.equals(type.getMissing()))
 									{
-									System.err.println("[sample"+x+"]["+j+"]"+tag+"=MISING");
+									LOG.debug("[sample"+x+"]["+j+"]"+tag+"=MISING");
 									if(tag.equals(VCFConstants.GENOTYPE_FILTER_KEY)) {
 										gt_values.add(VCFConstants.UNFILTERED);
 										}
@@ -326,12 +373,12 @@ public class BCFCodec implements Closeable {
 										}
 									}
 								if(o instanceof Integer) {
-									Integer v0 = Integer.class.cast(o);
+									final Integer v0 = Integer.class.cast(o);
 									if(tag.equals(VCFConstants.GENOTYPE_KEY)) {
 										final int v=v0.intValue();
 										int allele_idx=((v>>1)-1);
 										phased = (v & 0x01) == 1;
-										System.err.println("[sample"+x+"]["+j+"]="+allele_idx+" "+alleles);
+										LOG.debug("[sample"+x+"]["+j+"]="+allele_idx+" "+alleles);
 										Allele a= allele_idx<0?Allele.NO_CALL:alleles.get(allele_idx);
 										gt_alleles.add(a);
 										}
@@ -340,11 +387,11 @@ public class BCFCodec implements Closeable {
 										gt_values.add(v0);
 										}
 									//final boolean phased = ((encoded.length > 1 ? encoded[1] : encoded[0]) & 0x01) == 1;
-									//System.err.println("[sample"+x+"]["+j+"]="+(v>>1));
+									//LOG.debug("[sample"+x+"]["+j+"]="+(v>>1));
 									}
 								else
 									{
-									gt_values.add(o);
+									gt_values.add(castType(hFmtLine.getType(),o));
 									}
 								}
 							}
@@ -387,16 +434,16 @@ public class BCFCodec implements Closeable {
 							gb.PL(pls);
 							}
 						else if(tag.equals(VCFConstants.GENOTYPE_FILTER_KEY)) {
-							System.err.println("X3 add string for "+tag +" as "+gt_values);
+							LOG.debug("X3 add string for "+tag +" as "+gt_values);
 							if(gt_values.isEmpty()) {
-								System.err.println("X4 add string for "+tag +" as .");
+								LOG.debug("X4 add string for "+tag +" as .");
 
 								gb.unfiltered();
 								}
 							else if(gt_values.size()==1) {
 								String filt =(String)gt_values.get(0);
 								if(filt.equals(VCFConstants.UNFILTERED)) filt=null;
-								System.err.println(">>>43 gb.filter  for "+tag +" as "+filt);
+								LOG.debug(">>>43 gb.filter  for "+tag +" as "+filt);
 
 								gb.unfiltered();
 								if(filt!=null) gb.filter(filt);
@@ -408,22 +455,41 @@ public class BCFCodec implements Closeable {
 							}
 						else
 							{
-							System.err.println(">>>>DEFAULT "+tag+"="+gt_values);
-							gb.attribute(tag, gt_values);
+							LOG.debug(">>>>DEFAULT "+tag+"="+gt_values);
 							}
-						System.err.println(">>>>X1 "+tag+"="+gt_values);
+						LOG.debug(">>>>X1 "+tag+"="+gt_values);
 						}
 					}
 				if(super.header.hasGenotypingData()) {
 					vcb.genotypes(this.genotypeBuilers.stream().map(GB->GB.make()).collect(Collectors.toList()));
 					}
 				}
-			System.err.println("EOF #####################################################");
+			LOG.debug("EOF #####################################################");
 			
 			return vcb.make();
 			}
 
+		
+		
+		
 		}
+	
+	
+private static Object castType(final VCFHeaderLineType type,Object o) {
+	if(o==null) return null;
+	if(o instanceof List) {
+		List<?> L=new ArrayList<>();
+		return L.stream().map(it->castType(type,it)).collect(Collectors.toList());
+		}
+	else if(o instanceof String) {
+		if(type.equals(VCFHeaderLineType.Float)) return Float.valueOf(String.class.cast(o));
+		if(type.equals(VCFHeaderLineType.Integer)) return Integer.valueOf(String.class.cast(o));
+		return o;
+	} else {
+		return o;
+	}
+}
+	
 
 private BCFCodec(InputStream bci) {
 	this.mInputStream = bci;

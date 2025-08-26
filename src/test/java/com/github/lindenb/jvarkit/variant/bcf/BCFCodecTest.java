@@ -1,3 +1,29 @@
+/*
+The MIT License (MIT)
+
+Copyright (c) 2025 Pierre Lindenbaum
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+*/
+
 package com.github.lindenb.jvarkit.variant.bcf;
 
 import java.io.IOException;
@@ -5,8 +31,10 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
@@ -14,9 +42,7 @@ import org.testng.annotations.Test;
 
 import htsjdk.samtools.util.BlockCompressedInputStream;
 import htsjdk.samtools.util.CloseableIterator;
-import htsjdk.samtools.util.FileExtensions;
 import htsjdk.samtools.util.Locatable;
-import htsjdk.tribble.Feature;
 import htsjdk.tribble.readers.AsciiLineReader;
 import htsjdk.tribble.readers.LineIterator;
 import htsjdk.tribble.readers.LineIteratorImpl;
@@ -27,11 +53,22 @@ import htsjdk.variant.vcf.VCFCodec;
 import htsjdk.variant.vcf.VCFFileReader;
 
 public class BCFCodecTest {
+	
+	static Iterator<Object[]> listVCFsFortest() {
+		return Arrays.asList(
+				"ALL.chr1.phase3_shapeit2_mvncall_integrated_v5b.20130502.genotypes",
+				"ALL.wgs.mergedSV.v8.20130502.svs.genotypes",
+				"gnomad.exomes.v4.1.sites.chr1",
+				"test01"
+				).stream()
+			.map(it->"testdata/"+it)
+			.map(it->new Object[] {it+".bcf",it+".vcf"})
+			.iterator();
+		}
+	
 	@DataProvider(name = "src1")
-	public Object[][] createData1() {
-		return new Object[][] {
-			{"testdata/test01.bcf","testdata/test01.vcf"}
-			};
+	public Iterator<Object[]> createData1() {
+		return listVCFsFortest();
 		}
 	
 	static List<VariantContext> readPlainVCF(final String vcfname) {
@@ -47,11 +84,25 @@ public class BCFCodecTest {
 			}
 		return L2;
 		}
-	
+	static String toString(Object o) {
+		
+		if(o instanceof List) {
+			StringBuilder sb=new StringBuilder();
+			sb.append("List(");
+			sb.append(List.class.cast(o).stream().map(it->toString(it)).collect(Collectors.joining(" , ")));
+			sb.append(")");
+			return sb.toString();
+			}
+		else
+			{
+			return String.valueOf(o)+":"+o.getClass().getSimpleName();
+			}
+		
+		}
 	static void compareLoc(Locatable f1,Locatable f2) {
 		Assert.assertEquals(f1.getContig(), f2.getContig());
 		Assert.assertEquals(f1.getStart(), f2.getStart());
-		Assert.assertEquals(f1.getEnd(), f2.getEnd());
+		Assert.assertEquals(f1.getEnd(), f2.getEnd(), f1.getContig()+":"+f1.getStart()+"-"+f1.getEnd()+" vs "+ f2.getContig()+":"+f2.getStart()+"-"+f2.getEnd());
 	}
 
 	static void compareLists(List<VariantContext> L1,List<VariantContext> L2) {
@@ -100,6 +151,10 @@ public class BCFCodecTest {
 		Assert.assertEquals(f1.getAlleles(), f2.getAlleles());
 		Assert.assertEquals(f1.filtersWereApplied(), f2.filtersWereApplied());
 		Assert.assertEquals(f1.getFilters(), f2.getFilters());
+		Assert.assertEquals(f1.hasLog10PError(), f2.hasLog10PError(),""+f1.getLog10PError()+" vs "+f2.getLog10PError());
+		if(f1.hasLog10PError()) {
+			Assert.assertEquals(f1.getLog10PError(), f2.getLog10PError(),0.1);
+			}
 		if(f1.hasID()) {
 			Assert.assertEquals(f1.getID(), f2.getID());
 			}
@@ -122,6 +177,18 @@ public class BCFCodecTest {
 	}
 	
 	static void compareAttribute(final String key,Object o1,Object o2) {
+		Assert.assertEquals(o1 instanceof List,o2 instanceof List);
+		if(o1 instanceof List) {
+			List<?> L1= List.class.cast(o1);
+			List<?> L2= List.class.cast(o2);
+			Assert.assertEquals(L1.size(),L2.size());
+			for(int i=0;i< L1.size();++i) {
+				 compareAttribute(key+"["+i+"]",L1.get(i),L2.get(i));
+				}
+			return;
+			}
+		
+		
 		if(o1!=null && o2!=null && !o1.getClass().equals(o2.getClass())) {
 			if(o1 instanceof Float && o2 instanceof String) {
 				compareAttribute(key, o1, Float.valueOf(String.class.cast(o2)));
@@ -129,7 +196,8 @@ public class BCFCodecTest {
 				}
 			}
 		
-		Assert.assertEquals(o1.toString(), o2.toString(),"not the same["+key+"] ("+o1+":"+o1.getClass()+") vs ("+o2+":"+o2.getClass()+")");
+		Assert.assertEquals(o1.toString(), o2.toString(),
+				"not the same{"+key+"} ("+toString(o1)+") vs {"+toString(o2)+"}");
 		}
 	
 	@Test(dataProvider="src1")
@@ -172,6 +240,8 @@ public class BCFCodecTest {
 			}
 		
 	}
+	
+	
 	
 	@Test(dataProvider="src1")
 	public void readLoc(String bcffname,String vcfname) throws IOException {

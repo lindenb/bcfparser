@@ -1,3 +1,28 @@
+/*
+The MIT License (MIT)
+
+Copyright (c) 2025 Pierre Lindenbaum
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+*/
 package com.github.lindenb.jvarkit.variant.bcf;
 
 import java.util.ArrayList;
@@ -5,10 +30,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import htsjdk.samtools.util.BinaryCodec;
+import htsjdk.samtools.util.Log;
+import htsjdk.variant.vcf.VCFHeaderLineType;
 
 class BCFTypedData {
+private static final Log LOG=Log.getInstance(BCFTypedData.class);
+
 private static final int MAX_LENGTH=15;
-private static final float bcf_float_missing    = 0x7F800001;
+static final float bcf_float_missing    = 0x7F800001;
 private static final float bcf_float_vector_end = 0x7F800002;
 private static final int  bcf_int8_vector_end  = Byte.MIN_VALUE+1;
 private static final int  bcf_int16_vector_end = Short.MIN_VALUE+1;
@@ -166,11 +195,11 @@ public static int decodeCount(BinaryCodec bc,byte b) {
 	}
 
 public static BCFTypedData read(BinaryCodec bc,byte b) {
-	System.err.println("byte ="+(int)b);
+	LOG.debug("byte ="+(int)b);
 	final Type t = decodeType(b);
-	System.err.println("type ="+t);
+	LOG.debug("type ="+t);
 	final int count = decodeCount(bc,b);
-	System.err.println("count ="+count);
+	LOG.debug("count ="+count);
 	final Object o;
 	switch(t) {
 		case MISSING: {
@@ -269,9 +298,27 @@ public static BCFTypedData read(BinaryCodec bc,byte b) {
 		}
 	}
 
-private static Float readFloat(BinaryCodec bc) {
-	return bc.readFloat();
-}
+
+static Object convertToVCFtype(VCFHeaderLineType linetype,final Object o) {
+	if(o instanceof List) {
+		List<?> L1=(List<?>)o;
+		List<Object> L2=new ArrayList<>(L1.size());
+		for(int i=0;i< L1.size();i++) {
+			L2.add(convertToVCFtype(linetype, L1.get(i)));
+			}
+		if(L2.size()==1) return L2.get(0);
+		return L2;
+		}
+	else if(o instanceof String && linetype.equals(VCFHeaderLineType.Float)) {
+		return Float.valueOf(String.class.cast(o));
+		}
+	else if(o instanceof String && linetype.equals(VCFHeaderLineType.Integer)) {
+		return Integer.valueOf(String.class.cast(o));
+		}
+	else {
+		return o;
+		}
+	}
 
 private static int decodeSize(final byte typeDescriptor) {
     return (0xF0 & typeDescriptor) >> 4;

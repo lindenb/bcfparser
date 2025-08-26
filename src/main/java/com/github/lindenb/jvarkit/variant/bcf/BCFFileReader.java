@@ -1,3 +1,28 @@
+/*
+The MIT License (MIT)
+
+Copyright (c) 2025 Pierre Lindenbaum
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+*/
 package com.github.lindenb.jvarkit.variant.bcf;
 
 import java.io.FileNotFoundException;
@@ -7,16 +32,13 @@ import java.nio.file.Path;
 
 import htsjdk.samtools.BAMFileSpan;
 import htsjdk.samtools.CSIIndex;
-import htsjdk.samtools.seekablestream.SeekableStream;
-import htsjdk.samtools.seekablestream.SeekableStreamFactory;
 import htsjdk.samtools.util.AbstractIterator;
-import htsjdk.samtools.util.BlockCompressedInputStream;
 import htsjdk.samtools.util.CloseableIterator;
 import htsjdk.samtools.util.FileExtensions;
 import htsjdk.samtools.util.Interval;
 import htsjdk.samtools.util.Locatable;
+import htsjdk.samtools.util.Log;
 import htsjdk.samtools.util.RuntimeIOException;
-import htsjdk.tribble.readers.PositionalBufferedStream;
 import htsjdk.variant.variantcontext.VariantContext;
 import htsjdk.variant.vcf.VCFHeader;
 import htsjdk.variant.vcf.VCFReader;
@@ -26,13 +48,15 @@ import htsjdk.variant.vcf.VCFReader;
  *
  */
 public class BCFFileReader implements VCFReader {
+private static final Log LOG=Log.getInstance(BCFFileReader.class);
+
 private final VCFHeader header;
 private final BCFCodec codec;
 private CSIIndex index = null;
 private BaseIterator currentIterator=null;
 
-private BCFFileReader(BCFCodec codec)  throws IOException  {
-	this.codec= codec;;
+private BCFFileReader(final BCFCodec codec)  throws IOException  {
+	this.codec= codec;
 	this.header=(VCFHeader)this.codec.readHeader();
 	}
 
@@ -68,7 +92,7 @@ public CloseableIterator<VariantContext> query(Locatable loc) {
 	if(loc==null) throw new IllegalArgumentException("loc is null");
 	if(BCFFileReader.this.currentIterator!=null) throw new IllegalStateException("already iterating");
     int tid = this.getHeader().getSequenceDictionary().getSequenceIndex(loc.getContig());
-    System.err.println("TID="+tid+" for "+loc);
+    LOG.debug("TID="+tid+" for "+loc);
     if(tid==-1) return new EmptyIterator();
 	final BAMFileSpan span = this.index.getSpanOverlapping(tid,loc.getStart(),loc.getEnd());
     long[] array=span.toCoordinateArray();
@@ -186,11 +210,11 @@ private static Path findIndex(final Path vcfPath0)  {
 			continue;
 			}
 		final String fileName = vcfPath.getFileName().toString();
-		System.err.println(fileName);
+		LOG.debug(fileName);
 		final String csi = fileName+ FileExtensions.CSI;
-		System.err.println(csi);
+		LOG.debug(csi);
  		final Path indexPath = vcfPath.resolveSibling(csi);
-		System.err.println(indexPath);
+		LOG.debug(indexPath);
 
         if (Files.isRegularFile(indexPath)) {
            return indexPath;
