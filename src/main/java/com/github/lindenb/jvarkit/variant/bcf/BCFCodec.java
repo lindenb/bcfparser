@@ -291,7 +291,6 @@ public class BCFCodec implements Closeable {
 				
 				for(int i=0;i< n_fmt;i++) {
 					int tag_id = BCFTypedData.read(bc2).intValue();
-					System.err.println("FMT-id="+tag_id);
 					final String tag = idx2word.get(tag_id);
 					final byte b= bc2.readByte();
 					System.err.println("FORMAT/"+tag +" has fmt_type="+BCFTypedData.decodeType(b));
@@ -299,6 +298,7 @@ public class BCFCodec implements Closeable {
 					BCFTypedData.Type type = BCFTypedData.decodeType(b);
 					for(int x=0;x< this.header.getNGenotypeSamples();++x) {
 						final GenotypeBuilder gb=this.genotypeBuilers.get(x);
+						boolean phased=false;
 						final List<Allele> gt_alleles=new ArrayList<>(n_element);
 						final List<Object> gt_values= new ArrayList<>(n_element);
 						
@@ -330,6 +330,7 @@ public class BCFCodec implements Closeable {
 									if(tag.equals(VCFConstants.GENOTYPE_KEY)) {
 										final int v=v0.intValue();
 										int allele_idx=((v>>1)-1);
+										phased = (v & 0x01) == 1;
 										System.err.println("[sample"+x+"]["+j+"]="+allele_idx+" "+alleles);
 										Allele a= allele_idx<0?Allele.NO_CALL:alleles.get(allele_idx);
 										gt_alleles.add(a);
@@ -349,6 +350,7 @@ public class BCFCodec implements Closeable {
 							}
 						if(tag.equals(VCFConstants.GENOTYPE_KEY) && !gt_alleles.isEmpty()) {
 							gb.alleles(gt_alleles);
+							gb.phased(phased);
 							}
 						else if(tag.equals(VCFConstants.GENOTYPE_QUALITY_KEY)) {
 							if(gt_values.isEmpty()) {

@@ -51,6 +51,7 @@ public class BCFCodecTest {
 		Assert.assertEquals(g1.hasGQ(), g2.hasGQ());
 		Assert.assertEquals(g1.hasAD(), g2.hasAD());
 		Assert.assertEquals(g1.hasPL(), g2.hasPL());
+		Assert.assertEquals(g1.isPhased(), g2.isPhased(),""+g1.getGenotypeString()+" "+g2.getGenotypeString());
 		Assert.assertEquals(g1.isFiltered(), g2.isFiltered(),
 				"was:"+g1.getSampleName()+":("+g1.getFilters()+":"+g1.isFiltered()+") ("+g2.getFilters()+":"+g2.isFiltered()+")"
 				);
@@ -66,7 +67,7 @@ public class BCFCodecTest {
 		if(g1.hasPL()) {
 			Assert.assertTrue(Arrays.equals(g1.getPL(), g2.getPL()));
 			}
-		Assert.assertTrue(g1.sameGenotype(g2, true));//TODO consider phase
+		Assert.assertTrue(g1.sameGenotype(g2, false));
 		Map<String,Object> m1= g1.getExtendedAttributes();
 		Map<String,Object> m2= g2.getExtendedAttributes();
 		Assert.assertEquals(m1.keySet(), m2.keySet());
