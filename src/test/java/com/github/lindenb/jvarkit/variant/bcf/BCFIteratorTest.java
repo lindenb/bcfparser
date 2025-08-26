@@ -1,6 +1,7 @@
 package com.github.lindenb.jvarkit.variant.bcf;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,9 +12,9 @@ import org.testng.annotations.Test;
 
 import htsjdk.samtools.util.CloseableIterator;
 import htsjdk.variant.variantcontext.VariantContext;
-import htsjdk.variant.vcf.VCFHeader;
+import htsjdk.variant.vcf.VCFFileReader;
 
-public class BCFFileReaderTest {
+public class BCFIteratorTest {
 	@DataProvider(name = "src1")
 	public Object[][] createData1() {
 		return new Object[][] {
@@ -21,27 +22,29 @@ public class BCFFileReaderTest {
 			};
 		}
 	@Test(dataProvider="src1")
-	public void testNoIndex(String bcffname,String vcfname) throws IOException{
+	public void read(String bcffname,String vcfname) throws IOException{
 		List<VariantContext> L1=new ArrayList<>();
-		try(BCFFileReader reader=new BCFFileReader(Paths.get(bcffname), false)) {
-			final VCFHeader h= reader.getHeader();
-			Assert.assertNotNull(h);
-			try(CloseableIterator<VariantContext> iter=reader.iterator()) {
+		try(BCFIterator iter=BCFIterator.open(bcffname)) {
+			while(iter.hasNext()) {
+				final VariantContext ctx=iter.next();
+				Assert.assertNotNull(ctx);
+				L1.add(ctx);
+				}
+		}
+		
+		Assert.assertFalse(L1.isEmpty(),"NO variant was found");
+
+		List<VariantContext> L2=new ArrayList<>();
+		try(VCFFileReader r=new VCFFileReader(Paths.get(vcfname),false)) {
+			try(CloseableIterator<VariantContext> iter=r.iterator()) {
 				while(iter.hasNext()) {
 					final VariantContext ctx=iter.next();
 					Assert.assertNotNull(ctx);
-					L1.add(ctx);
+					L2.add(ctx);
 					}
 				}
 			}
-		Assert.assertFalse(L1.isEmpty(),"NO variant was found");
-		}
-	
-	@Test(dataProvider="src1")
-	public void testWithIndex(String bcffname,String vcfname) throws IOException{
-		try(BCFFileReader reader=new BCFFileReader(Paths.get(bcffname), true)) {
-			final VCFHeader h= reader.getHeader();
-			Assert.assertNotNull(h);
-		}
+		Assert.assertFalse(L2.isEmpty(),"NO variant was found");
+		BCFCodecTest.compareLists(L1, L2);
 	}
 }

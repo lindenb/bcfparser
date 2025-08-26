@@ -16,6 +16,7 @@ private static final int  bcf_int32_vector_end = Integer.MIN_VALUE+1;
 private static final int  bcf_int8_missing  = Byte.MIN_VALUE;
 private static final int  bcf_int16_missing = Short.MIN_VALUE;
 private static final int  bcf_int32_missing = Integer.MIN_VALUE;
+private static final byte  bcf_char_vector_end = (byte)0;
 
 
 
@@ -94,8 +95,18 @@ public int intValue() {
 		return s;
 		}
 
+public static String readString(BinaryCodec bc,int length) {
+	int i;
+	byte[] a=new byte[length];
+	bc.readBytes(a);
+	for(i=0;i< length;i++) {
+		if(a[i]==bcf_char_vector_end) break;
+		}
+	return new String(a,0,i);
+	}	
+	
 public static String readString(BinaryCodec bc) {
-	BCFTypedData td = read(bc);
+	final BCFTypedData td = read(bc);
 	if(td.type!=Type.CHAR) throw new IllegalStateException("expected CHAR but got "+td.type.name());
 	return String.class.cast(td.value);
 	}
@@ -159,6 +170,7 @@ public static BCFTypedData read(BinaryCodec bc,byte b) {
 	final Type t = decodeType(b);
 	System.err.println("type ="+t);
 	final int count = decodeCount(bc,b);
+	System.err.println("count ="+count);
 	final Object o;
 	switch(t) {
 		case MISSING: {
@@ -250,18 +262,7 @@ public static BCFTypedData read(BinaryCodec bc,byte b) {
 				}
 		case CHAR:
 			{
-			if(count==0) {
-				o = "";
-				}
-			else if(count==1) {
-				o= String.valueOf((char)bc.readByte());
-				}
-			else
-				{
-				byte[] a=new byte[count];
-				bc.readBytes(a);
-				o = new String(a);
-				}
+			o = readString(bc,count);
 			return new BCFTypedData(t,count,o);
 			}
 		default: throw new IllegalArgumentException("undefined type:"+t);

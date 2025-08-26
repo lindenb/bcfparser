@@ -11,7 +11,7 @@ endif
 all: bcf.jar testng.xml bcf.jar testdata/test01.bcf.csi
 	java -cp ${TESTNG}:${HTSJDK}:bcf.jar org.testng.TestNG testng.xml
 
-CLASSES=BCFCodec BCFFileReader
+CLASSES=BCFCodec BCFFileReader BCFIterator
 
 bcf.jar : $(addsuffix .java,$(addprefix ./src/main/java/com/github/lindenb/jvarkit/variant/bcf/,$(CLASSES) BCFTypedData)) \
 	$(addsuffix Test.java,$(addprefix ./src/test/java/com/github/lindenb/jvarkit/variant/bcf/,$(CLASSES)))

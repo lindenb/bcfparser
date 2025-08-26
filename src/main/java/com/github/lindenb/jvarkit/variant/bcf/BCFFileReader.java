@@ -28,24 +28,16 @@ import htsjdk.variant.vcf.VCFReader;
 public class BCFFileReader implements VCFReader {
 private final VCFHeader header;
 private final BCFCodec codec;
-private final BlockCompressedInputStream BGZInputStream;
-private final long firstVariantOffset;
 private CSIIndex index = null;
 private BaseIterator currentIterator=null;
 
-private BCFFileReader(BlockCompressedInputStream BGZInputStream)  throws IOException  {
-	this.codec=new  BCFCodec();
-	this.BGZInputStream=BGZInputStream;
-	System.err.println("POSX1="+BGZInputStream.getPosition());
-	PositionalBufferedStream pbs= codec.makeSourceFromStream(BGZInputStream);
-	this.header=(VCFHeader)this.codec.readHeader(pbs).getHeaderValue();
-	System.err.println("POSX2="+BGZInputStream.getPosition()+" "+pbs.getPosition());
-	System.err.println("done ?="+pbs.isDone());
-	this.firstVariantOffset = BGZInputStream.getPosition();
+private BCFFileReader(BCFCodec codec)  throws IOException  {
+	this.codec= codec;;
+	this.header=(VCFHeader)this.codec.readHeader();
 	}
 
 public	BCFFileReader(Path file,boolean requireIndex) throws IOException {
-	this(new BlockCompressedInputStream(file));
+	this(BCFCodec.open(file.toString()));
 	
 	if(requireIndex) {
 		final Path csiPath=findIndex(file);
@@ -57,6 +49,8 @@ public	BCFFileReader(Path file,boolean requireIndex) throws IOException {
 		this.index=null;
 		}
 	}
+
+
 
 @Override
 public CloseableIterator<VariantContext> iterator() {
@@ -83,14 +77,12 @@ public final CloseableIterator<VariantContext> query(String chrom, int start, in
 private abstract class BaseIterator extends AbstractIterator<VariantContext>
 implements CloseableIterator<VariantContext>
 	{
-	protected PositionalBufferedStream positionalBufferedStream=null;
 	
 	VariantContext getNextRecord() throws IOException {
-		return BCFFileReader.this.codec.decode(positionalBufferedStream);
+		return BCFFileReader.this.codec.decode();
 		}
 	@Override
 	public void close() {
-		positionalBufferedStream=null;
 		BCFFileReader.this.currentIterator=null;
 		}	
 	}
@@ -105,27 +97,18 @@ private class EmptyIterator extends BaseIterator {
 private class MyIterator extends BaseIterator
 	{
 	MyIterator() {
+		
 		try {
-			System.err.println("POS1="+BGZInputStream.getPosition());
-			BCFFileReader.this.BGZInputStream.seek(firstVariantOffset);
-			System.err.println("POS2="+BGZInputStream.getPosition());
-			}
-		catch(IOException err) {
-			throw new RuntimeIOException(err);
-			}
+			BCFFileReader.this.codec.rewind();
+		} catch (IOException e) {
+			throw new RuntimeIOException(e);
+		}
+	
 		}
 	
 	@Override
 	protected VariantContext advance() {
-		System.err.println("POS3="+BGZInputStream.getPosition());
-		if(positionalBufferedStream==null) {
-			positionalBufferedStream=codec.makeSourceFromStream(BGZInputStream);
-			}
 		try {
-			if(positionalBufferedStream.isDone())  {
-				System.err.println("IsDONE==true");
-				return null;
-				}
 			return getNextRecord();
 			}
 		catch(IOException err) {
@@ -149,21 +132,18 @@ private class MyQueryIterator extends BaseIterator
 	protected VariantContext advance() {
 		try {
 			 // Advance to next file block if necessary
-	        while (BGZInputStream.getPosition() >= mFilePointerLimit) {
+	        while (0 >= mFilePointerLimit) {
 	            if (mFilePointers == null ||
 	                    mFilePointerIndex >= mFilePointers.length) {
 	                return null;
 	            }
 	            final long startOffset = mFilePointers[mFilePointerIndex++];
 	            final long endOffset = mFilePointers[mFilePointerIndex++];
-	            BGZInputStream.seek(startOffset);
+	            BCFFileReader.this.codec.seek(startOffset);
 	            mFilePointerLimit = endOffset;
-	            this.positionalBufferedStream = null;
 	        	}
 	        
-	        if(super.positionalBufferedStream==null) {
-	        	super.positionalBufferedStream=codec.makeSourceFromStream(BGZInputStream);
-	        	}
+	      
 	        
 	        // Pull next record from stream
 	        return getNextRecord();
@@ -187,7 +167,7 @@ public boolean isQueryable() {
 public void close() throws IOException {
 	if(currentIterator!=null) currentIterator.close();
 	currentIterator=null;
-	this.BGZInputStream.close();
+	this.codec.close();
 	}
 
 

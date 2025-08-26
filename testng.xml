@@ -4,12 +4,13 @@
   <test name="Regression1" enabled="false">
     <classes>
       <class name="com.github.lindenb.jvarkit.variant.bcf.BCFCodecTest" />
+       <class name="com.github.lindenb.jvarkit.variant.bcf.BCFFileReaderTest"/>
     </classes>
   </test>
   
     <test name="Regression2" enabled="true">
     <classes>
-      <class name="com.github.lindenb.jvarkit.variant.bcf.BCFFileReaderTest"/>
+     	<class name="com.github.lindenb.jvarkit.variant.bcf.BCFIteratorTest"/>
     </classes>
   </test>
 </suite>
