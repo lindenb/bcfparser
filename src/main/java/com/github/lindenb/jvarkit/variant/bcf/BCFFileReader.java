@@ -63,11 +63,14 @@ public final CloseableIterator<VariantContext> query(String chrom, int start, in
 	return query(new Interval(chrom,start,end));
 	}
 @Override
-	public CloseableIterator<VariantContext> query(Locatable loc) {
+public CloseableIterator<VariantContext> query(Locatable loc) {
+	if(this.index==null) throw new IllegalStateException("no index is available");
+	if(loc==null) throw new IllegalArgumentException("loc is null");
 	if(BCFFileReader.this.currentIterator!=null) throw new IllegalStateException("already iterating");
     int tid = this.getHeader().getSequenceDictionary().getSequenceIndex(loc.getContig());
+    System.err.println("TID="+tid+" for "+loc);
     if(tid==-1) return new EmptyIterator();
-	final BAMFileSpan span = index.getSpanOverlapping(tid,loc.getStart(),loc.getEnd());
+	final BAMFileSpan span = this.index.getSpanOverlapping(tid,loc.getStart(),loc.getEnd());
     long[] array=span.toCoordinateArray();
     BCFFileReader.this.currentIterator =  new MyQueryIterator(loc,array);
     return BCFFileReader.this.currentIterator;
@@ -146,7 +149,9 @@ private class MyQueryIterator extends BaseIterator
 	      
 	        
 	        // Pull next record from stream
-	        return getNextRecord();
+	        VariantContext ctx= getNextRecord();
+	        if(ctx==null || !ctx.overlaps(this.interval)) return null;
+	        return ctx;
 			}
 		catch(IOException err ) {
 			throw new RuntimeIOException(err);

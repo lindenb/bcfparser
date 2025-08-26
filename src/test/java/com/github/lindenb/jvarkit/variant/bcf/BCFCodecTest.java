@@ -13,6 +13,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import htsjdk.samtools.util.BlockCompressedInputStream;
+import htsjdk.samtools.util.CloseableIterator;
 import htsjdk.samtools.util.FileExtensions;
 import htsjdk.samtools.util.Locatable;
 import htsjdk.tribble.Feature;
@@ -23,6 +24,7 @@ import htsjdk.tribble.readers.PositionalBufferedStream;
 import htsjdk.variant.variantcontext.Genotype;
 import htsjdk.variant.variantcontext.VariantContext;
 import htsjdk.variant.vcf.VCFCodec;
+import htsjdk.variant.vcf.VCFFileReader;
 
 public class BCFCodecTest {
 	@DataProvider(name = "src1")
@@ -31,6 +33,21 @@ public class BCFCodecTest {
 			{"testdata/test01.bcf","testdata/test01.vcf"}
 			};
 		}
+	
+	static List<VariantContext> readPlainVCF(final String vcfname) {
+		List<VariantContext> L2=new ArrayList<>();
+		try(VCFFileReader r=new VCFFileReader(Paths.get(vcfname),false)) {
+			try(CloseableIterator<VariantContext> iter=r.iterator()) {
+				while(iter.hasNext()) {
+					final VariantContext ctx=iter.next();
+					Assert.assertNotNull(ctx);
+					L2.add(ctx);
+					}
+				}
+			}
+		return L2;
+		}
+	
 	static void compareLoc(Locatable f1,Locatable f2) {
 		Assert.assertEquals(f1.getContig(), f2.getContig());
 		Assert.assertEquals(f1.getStart(), f2.getStart());
