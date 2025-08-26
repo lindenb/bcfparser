@@ -36,6 +36,11 @@ import htsjdk.variant.variantcontext.VariantContext;
 import htsjdk.variant.vcf.VCFHeader;
 import htsjdk.variant.vcf.VCFIterator;
 
+/**
+ * Implementation of {@link VCFIterator} for BCF
+ * @author Pierre Lindenbaum
+ *
+ */
 public class BCFIterator extends AbstractIterator<VariantContext> implements VCFIterator{
 private static final Log LOG=Log.getInstance(BCFIterator.class);
 private final BCFCodec codec;
@@ -45,14 +50,32 @@ BCFIterator(final BCFCodec codec) throws IOException {
 	this.header = codec.readHeader();
 	}
 
-public static BCFIterator open(InputStream in) throws IOException {
+/** 
+ * open a BCFIterator from an InputStream
+ * @param in the input stream
+ * @return the new BCFIterator
+ * @throws IOException on I/O error
+ */
+public static BCFIterator open(final InputStream in) throws IOException {
 	return new BCFIterator(BCFCodec.open(in));
 	}
 
+/** open a VCFIterator from a PATH
+ * 
+ * @param fname the path 
+ * @throws IOException on I/O error
+ * @return the new BCFIterator
+ */
 public static BCFIterator open(Path fname) throws IOException {
 	return new BCFIterator(BCFCodec.open(fname.toString()));
 	}
 
+/** 
+ * open a BCFIterator from a file name
+ * @param fname the input file
+ * @throws IOException on I/O error
+ * @return the new BCFIterator
+ */
 public static BCFIterator open(String fname) throws IOException {
 	return new BCFIterator(BCFCodec.open(fname));
 	}

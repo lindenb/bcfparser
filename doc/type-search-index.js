@@ -1,0 +1,1 @@
+typeSearchIndex = [{"l":"All Classes and Interfaces","u":"allclasses-index.html"},{"p":"com.github.lindenb.jvarkit.variant.bcf","l":"BCFFileReader"},{"p":"com.github.lindenb.jvarkit.variant.bcf","l":"BCFIterator"}];updateSearchResults();

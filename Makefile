@@ -1,6 +1,6 @@
 .SHELL=/bin/bash
 
-.PHONY=clean test all jar
+.PHONY=clean test all jar javadoc
 HTSJDK?=${HOME}/src/htsjdk/build/libs/htsjdk-4.2.0-6-g6eb0607-SNAPSHOT.jar
 TESTNG?=${HOME}/src/jvarkit/lib/com/beust/jcommander/1.82/jcommander-1.82.jar:${HOME}/src/jvarkit/lib/org/testng/testng/6.14.3/testng-6.14.3.jar
 
@@ -14,7 +14,7 @@ ifeq ($(realpath $(HTSJDK)),)
 $(error You need to specify HTSJDK=... and TESTNG=... when invoking make. Something like 'make HTSJDK=$(HTSHDJ) TESTNG=$(TESTNG)')
 endif
 
-all: jar test
+all: jar javadoc test
 
 test : bcf.jar testng.xml bcf.jar testdata/test01.bcf.csi
 	java -cp ${TESTNG}:${HTSJDK}:bcf.jar org.testng.TestNG testng.xml
@@ -30,6 +30,10 @@ bcf.jar : $(addsuffix .java,$(addprefix ./src/main/java/com/github/lindenb/jvark
 	javac -cp $(HTSJDK):$(TESTNG) -d tmp $^
 	jar cvf $@ -C tmp .
 	rm -rf tmp
+
+javadoc : $(addsuffix .java,$(addprefix ./src/main/java/com/github/lindenb/jvarkit/variant/bcf/,$(CLASSES)))
+	mkdir -p doc
+	javadoc -cp $(HTSJDK) -d doc -sourcepath src/main/java com.github.lindenb.jvarkit.variant.bcf
 
 testdata/test01.bcf.csi : testdata/test01.bcf
 	bcftools index -f $<

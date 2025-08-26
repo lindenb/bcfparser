@@ -44,8 +44,8 @@ import htsjdk.variant.vcf.VCFHeader;
 import htsjdk.variant.vcf.VCFReader;
 /****************
  *
- * 
- *
+ * Implementation of a {@link VCFReader} for BCF
+ * @author Pierre Lindenbaum
  */
 public class BCFFileReader implements VCFReader {
 private static final Log LOG=Log.getInstance(BCFFileReader.class);
@@ -59,7 +59,12 @@ private BCFFileReader(final BCFCodec codec)  throws IOException  {
 	this.codec= codec;
 	this.header=(VCFHeader)this.codec.readHeader();
 	}
-
+/**
+ * Open a new BCFFileReader
+ * @param file the bcf file
+ * @param requireIndex shall we load an index 
+ * @throws IOException on I/O error
+ */
 public	BCFFileReader(Path file,boolean requireIndex) throws IOException {
 	this(BCFCodec.open(file.toString()));
 	
@@ -83,6 +88,7 @@ public CloseableIterator<VariantContext> iterator() {
 	return BCFFileReader.this.currentIterator;
 	}
 
+@Override
 public final CloseableIterator<VariantContext> query(String chrom, int start, int end) {
 	return query(new Interval(chrom,start,end));
 	}

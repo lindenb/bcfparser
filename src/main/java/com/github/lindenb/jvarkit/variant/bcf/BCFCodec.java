@@ -65,7 +65,7 @@ import htsjdk.variant.vcf.VCFHeaderLine;
 import htsjdk.variant.vcf.VCFHeaderLineType;
 import htsjdk.variant.vcf.VCFInfoHeaderLine;
 
-public class BCFCodec implements Closeable {
+class BCFCodec implements Closeable {
 	private static final String HTS_IDX_DELIM = "##idx##";
     private  InputStream mInputStream;    
 	private static final Log LOG=Log.getInstance(BCFCodec.class);

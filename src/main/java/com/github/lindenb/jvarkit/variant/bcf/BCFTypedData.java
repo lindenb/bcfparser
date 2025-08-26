@@ -78,24 +78,26 @@ public BCFTypedData(Type type,int count,Object o) {
 	this.value = o;
 	}
 
-public Type getType() {
+Type getType() {
 	return type;
 	}	
-public int getCount() {
+int getCount() {
 	return count;
 	}
 
-public Object getValue() {
+Object getValue() {
 	return this.value;
 	}
-public boolean isNull() {
+
+boolean isNull() {
 	return this.value==null;
 	}
-public boolean isList() {
+
+boolean isList() {
 	return this.value!=null && this.value instanceof List;
 	}
 
-public int intValue() {
+int intValue() {
 	if(this.value==null || !(value instanceof Integer)) {
 		throw new IllegalArgumentException("not and integer "+this.toString());
 		}
@@ -124,7 +126,7 @@ public int intValue() {
 		return s;
 		}
 
-public static String readString(BinaryCodec bc,int length) {
+static String readString(BinaryCodec bc,int length) {
 	int i;
 	byte[] a=new byte[length];
 	bc.readBytes(a);
@@ -133,14 +135,14 @@ public static String readString(BinaryCodec bc,int length) {
 		}
 	return new String(a,0,i);
 	}	
-	
-public static String readString(BinaryCodec bc) {
+
+static String readString(BinaryCodec bc) {
 	final BCFTypedData td = read(bc);
 	if(td.type!=Type.CHAR) throw new IllegalStateException("expected CHAR but got "+td.type.name());
 	return String.class.cast(td.value);
 	}
 
-public static int[] readIntArray(BinaryCodec bc) {
+static int[] readIntArray(BinaryCodec bc) {
 	BCFTypedData td = read(bc);
 	switch(td.type) {
 		case MISSING: return new int[0];
@@ -164,7 +166,7 @@ public static int[] readIntArray(BinaryCodec bc) {
 		}
 	}
 
-public static Object readAtomic(BinaryCodec bc,Type t) {
+static Object readAtomic(BinaryCodec bc,Type t) {
 	switch(t) {
 		case MISSING : return null;
 		case INT8: return Integer.valueOf(bc.readByte());
@@ -176,12 +178,12 @@ public static Object readAtomic(BinaryCodec bc,Type t) {
 	}
 }
 
-public static BCFTypedData read(BinaryCodec bc) {
+static BCFTypedData read(BinaryCodec bc) {
 	final byte b = bc.readByte();
 	return read(bc,b);
 	}
 
-public static int decodeCount(BinaryCodec bc,byte b) {
+static int decodeCount(BinaryCodec bc,byte b) {
 	final int count0 = decodeSize(b);
 	final int count;
 	if(count0 >= MAX_LENGTH) {
@@ -194,7 +196,7 @@ public static int decodeCount(BinaryCodec bc,byte b) {
 	return count;
 	}
 
-public static BCFTypedData read(BinaryCodec bc,byte b) {
+static BCFTypedData read(BinaryCodec bc,byte b) {
 	LOG.debug("byte ="+(int)b);
 	final Type t = decodeType(b);
 	LOG.debug("type ="+t);
