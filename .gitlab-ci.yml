@@ -1,0 +1,21 @@
+image: eclipse-temurin:17-jdk
+
+before_script:
+  - hostname
+  - env | grep -i PROXY
+  - apt-get update -y
+  - apt-get install -y make wget
+  - echo -e 'systemProp.http.proxyHost=proxy-serveur.univ-nantes.prive\nsystemProp.http.proxyPort=3128\nsystemProp.https.proxyHost=proxy-serveur.univ-nantes.prive\nsystemProp.https.proxyPort=3128' >  gradle.properties
+
+
+stages:          # List of stages for jobs, and their order of execution
+  - build
+
+build-job:       # This job will compile your project
+  stage: build
+  script:
+    - make     # Assuming 'make' is your command to build the project
+  artifacts:
+    paths:
+        - bcf.jar
+

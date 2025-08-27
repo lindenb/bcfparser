@@ -35,11 +35,10 @@ try(VCFIterator iter = BCFIterator.open(pat)) {
 
 # Compilation
 
-Compilation of the library `bcf.jar` requires a java compiler as well as the jar libraries for htsjdk , jcommander and testng
-Yeah, I'm lazy, feel free to add a build.gradle.
+Compilation of the library `bcf.jar` requires a java compiler, `make`, `wget`.
 
 ```
-make HTSJDK=/path/to/htsjdk.jar TESTNG=/path/to/jcommander.jar:/path/to/testng.jar
+make
 
 ```
 
@@ -49,3 +48,4 @@ Pierre Lindenbaum PhD
 Institut du Thorax
 44000 Nantes
 France
+
