@@ -59,7 +59,8 @@ public class BCFCodecTest {
 				"ALL.chr1.phase3_shapeit2_mvncall_integrated_v5b.20130502.genotypes",
 				"ALL.wgs.mergedSV.v8.20130502.svs.genotypes",
 				"gnomad.exomes.v4.1.sites.chr1",
-				"test01"
+				"test01",
+				"test02"
 				).stream()
 			.map(it->"testdata/"+it)
 			.map(it->new Object[] {it+".bcf",it+".vcf"})

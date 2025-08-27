@@ -164,6 +164,7 @@ private class MyQueryIterator extends BaseIterator
 	@Override
 	protected VariantContext advance() {
 		try {
+		for(;;) {
 			 // Advance to next file block if necessary
 	        while (0 >= mFilePointerLimit) {
 	            if (mFilePointers == null ||
@@ -180,8 +181,10 @@ private class MyQueryIterator extends BaseIterator
 	        
 	        // Pull next record from stream
 	        VariantContext ctx= getNextRecord();
-	        if(ctx==null || !ctx.overlaps(this.interval)) return null;
+	        if(ctx==null) return null;
+	        if(!ctx.overlaps(this.interval)) continue;
 	        return ctx;
+	        }
 			}
 		catch(IOException err ) {
 			throw new RuntimeIOException(err);

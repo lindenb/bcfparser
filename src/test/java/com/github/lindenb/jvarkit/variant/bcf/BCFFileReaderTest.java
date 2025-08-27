@@ -53,7 +53,15 @@ public class BCFFileReaderTest {
 	public Iterator<Object[]>  createData2() {
 		return Arrays.asList(
 			new Object[]{"chr1",1,100000000},
-			new Object[]{"chr5",1,1000000000}
+			new Object[]{"chr1",1000,2000},
+			new Object[]{"chr2",1000,2000},
+			new Object[]{"chr3",1000,2000},
+			new Object[]{"chr4",1000,2000},
+			new Object[]{"chr5",1,1000000000},
+			new Object[]{"chr10",1000,2000},
+			new Object[]{"chr10",100000,200000},
+			new Object[]{"chr11",10000,20000},
+			new Object[]{"chr20",1000,20000}
 			).iterator();
 		}
 	
@@ -108,23 +116,26 @@ public class BCFFileReaderTest {
 	
 	@Test(dataProvider="src3")
 	public void testWithIndex(String bcffname,String vcfname,String contig,int start,int end) throws IOException{
-		List<VariantContext> L1=new ArrayList<>();
-		Interval loc =new Interval(contig,start,end);
+		final List<VariantContext> L1=new ArrayList<>();
+		final Interval loc =new Interval(contig,start,end);
 		try(BCFFileReader reader=new BCFFileReader(Paths.get(bcffname), true)) {
 			final VCFHeader h= reader.getHeader();
 			Assert.assertNotNull(h);
-			try(CloseableIterator<VariantContext> iter=reader.query(loc)) {
-				Assert.assertNotNull(iter);
-				while(iter.hasNext()) {
-					VariantContext vc=iter.next();
-					Assert.assertNotNull(vc);
-					Assert.assertTrue(vc.overlaps(loc),""+loc+" "+new Interval(vc));
-					L1.add(vc);
+			for(int ntry=0;ntry<3;++ntry) {
+				L1.clear();
+				try(CloseableIterator<VariantContext> iter=reader.query(loc)) {
+					Assert.assertNotNull(iter);
+					while(iter.hasNext()) {
+						VariantContext vc=iter.next();
+						Assert.assertNotNull(vc);
+						Assert.assertTrue(vc.overlaps(loc),""+loc+" "+new Interval(vc));
+						L1.add(vc);
+					}
 				}
 			}
 		}
 		
-		List<VariantContext> L2= BCFCodecTest.readPlainVCF(vcfname).stream().filter(it->it.overlaps(loc)).collect(Collectors.toList());
+		final List<VariantContext> L2= BCFCodecTest.readPlainVCF(vcfname).stream().filter(it->it.overlaps(loc)).collect(Collectors.toList());
 		BCFCodecTest.compareLists(L1, L2);
 	}
 }
