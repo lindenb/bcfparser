@@ -27,6 +27,7 @@ package com.github.lindenb.jvarkit.variant.bcf;
 
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -39,6 +40,7 @@ import org.testng.annotations.Test;
 
 
 import htsjdk.samtools.util.CloseableIterator;
+import htsjdk.samtools.util.FileExtensions;
 import htsjdk.samtools.util.Interval;
 import htsjdk.variant.variantcontext.VariantContext;
 import htsjdk.variant.vcf.VCFHeader;
@@ -115,7 +117,9 @@ public class BCFFileReaderTest {
 		}
 	
 	@Test(dataProvider="src3")
-	public void testWithIndex(String bcffname,String vcfname,String contig,int start,int end) throws IOException{
+	public void testWithIndex(String bcffname,String vcfname,String contig,int start,int end) throws IOException {
+		if(Files.notExists(Paths.get(bcffname + FileExtensions.CSI))) return;
+		
 		final List<VariantContext> L1=new ArrayList<>();
 		final Interval loc =new Interval(contig,start,end);
 		try(BCFFileReader reader=new BCFFileReader(Paths.get(bcffname), true)) {

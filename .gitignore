@@ -3,3 +3,4 @@
 *.jar
 test-output
 *.class
+/bin/

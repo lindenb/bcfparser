@@ -1,4 +1,4 @@
-/*
+	/*
 The MIT License (MIT)
 
 Copyright (c) 2025 Pierre Lindenbaum
@@ -357,6 +357,7 @@ class BCFCodec implements Closeable {
 						else {
 							for(int j=0;j< n_element;++j) {
 								final Object o = BCFTypedData.readAtomic(bc2,type);
+
 								if(o.equals(type.getEndVector())) {
 									LOG.debug("end vector, break v="+o+" "+type.getEndVector()+"/"+type.getMissing());
 									break;
@@ -371,7 +372,10 @@ class BCFCodec implements Closeable {
 										{
 										gt_values.add(null);
 										}
+									continue;
 									}
+
+									
 								if(o instanceof Integer) {
 									final Integer v0 = Integer.class.cast(o);
 									if(tag.equals(VCFConstants.GENOTYPE_KEY)) {
@@ -379,7 +383,7 @@ class BCFCodec implements Closeable {
 										int allele_idx=((v>>1)-1);
 										phased = (v & 0x01) == 1;
 										LOG.debug("[sample"+x+"]["+j+"]="+allele_idx+" "+alleles);
-										Allele a= allele_idx<0?Allele.NO_CALL:alleles.get(allele_idx);
+										final Allele a= allele_idx<0?Allele.NO_CALL:alleles.get(allele_idx);
 										gt_alleles.add(a);
 										}
 									else
@@ -400,7 +404,7 @@ class BCFCodec implements Closeable {
 							gb.phased(phased);
 							}
 						else if(tag.equals(VCFConstants.GENOTYPE_QUALITY_KEY)) {
-							if(gt_values.isEmpty()) {
+							if(gt_values.isEmpty() || (gt_values.size()==1 && gt_values.get(0)==null)) {
 								//nothing
 								}
 							else if(gt_values.size()==1) {
@@ -409,7 +413,7 @@ class BCFCodec implements Closeable {
 								}
 							else
 								{
-								throw new IllegalArgumentException();
+								throw new IllegalArgumentException(tag+" count="+gt_values+"? for samples-0[" + x + "]");
 								}
 							}
 						else if(tag.equals(VCFConstants.DEPTH_KEY)) {
@@ -455,6 +459,16 @@ class BCFCodec implements Closeable {
 							}
 						else
 							{
+							if(gt_values.isEmpty() || (gt_values.size()==1 && (gt_values.get(0)==null ||(gt_values.get(0).equals(VCFConstants.MISSING_VALUE_v4) )))) {
+								// nothing
+								}
+							else if(gt_values.size()==1) {
+								gb.attribute(tag, gt_values.get(0));
+								}
+							else
+								{
+								gb.attribute(tag, gt_values);
+								}
 							LOG.debug(">>>>DEFAULT "+tag+"="+gt_values);
 							}
 						LOG.debug(">>>>X1 "+tag+"="+gt_values);

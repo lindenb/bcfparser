@@ -60,7 +60,8 @@ public class BCFCodecTest {
 				"ALL.wgs.mergedSV.v8.20130502.svs.genotypes",
 				"gnomad.exomes.v4.1.sites.chr1",
 				"test01",
-				"test02"
+				"test02",
+				"test03.no_idx"
 				).stream()
 			.map(it->"testdata/"+it)
 			.map(it->new Object[] {it+".bcf",it+".vcf"})
@@ -139,7 +140,7 @@ public class BCFCodecTest {
 		Assert.assertTrue(g1.sameGenotype(g2, false));
 		Map<String,Object> m1= g1.getExtendedAttributes();
 		Map<String,Object> m2= g2.getExtendedAttributes();
-		Assert.assertEquals(m1.keySet(), m2.keySet());
+		Assert.assertEquals(m1.keySet(), m2.keySet(),""+g1.getExtendedAttributes()+" "+g2.getExtendedAttributes());
 		for(final String k: m1.keySet()) {
 			compareAttribute(k, m1.get(k), m2.get(k));
 			}
