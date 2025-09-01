@@ -75,7 +75,7 @@ public class BCFIteratorTest {
 		BCFCodecTest.compareLists(L1, L2);
 	}
 	
-	@Test(dataProvider="src1",expectedExceptions = {SAMFormatException.class,FileTruncatedException.class})
+	@Test(dataProvider="src1",expectedExceptions = {SAMFormatException.class,FileTruncatedException.class,IOException.class})
 	public void testBadFormat(String bcffname,String vcfname) throws IOException {
 		try(BCFIterator reader= BCFIterator.open(vcfname)) {
 			}

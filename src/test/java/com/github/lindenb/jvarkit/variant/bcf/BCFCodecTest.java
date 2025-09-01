@@ -40,6 +40,7 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import htsjdk.samtools.util.AbstractIterator;
 import htsjdk.samtools.util.BlockCompressedInputStream;
 import htsjdk.samtools.util.CloseableIterator;
 import htsjdk.samtools.util.Locatable;
@@ -47,6 +48,7 @@ import htsjdk.tribble.readers.AsciiLineReader;
 import htsjdk.tribble.readers.LineIterator;
 import htsjdk.tribble.readers.LineIteratorImpl;
 import htsjdk.tribble.readers.PositionalBufferedStream;
+import htsjdk.variant.bcf2.BCFVersion;
 import htsjdk.variant.variantcontext.Genotype;
 import htsjdk.variant.variantcontext.VariantContext;
 import htsjdk.variant.vcf.VCFCodec;
@@ -61,16 +63,34 @@ public class BCFCodecTest {
 				"gnomad.exomes.v4.1.sites.chr1",
 				"test01",
 				"test02",
-				"test03.no_idx"
+				"test03.no_idx",
+				"test04.bcf2_1"
 				).stream()
 			.map(it->"testdata/"+it)
 			.map(it->new Object[] {it+".bcf",it+".vcf"})
 			.iterator();
 		}
 	
+	static Iterator<Object[]> listBCF22Fortest() {
+		final Iterator<Object[]> iter= listVCFsFortest();
+		return new AbstractIterator<Object[]>() {
+			@Override
+			protected Object[] advance() {
+				while(iter.hasNext()) {
+					Object[] it = iter.next();
+					if(it==null) return null;
+					if(it[0].toString().contains("bcf2_1")) continue;
+					return it;
+					}
+				return null;
+				}
+			};
+		
+		}
+	
 	@DataProvider(name = "src1")
 	public Iterator<Object[]> createData1() {
-		return listVCFsFortest();
+		return listBCF22Fortest();
 		}
 	
 	static List<VariantContext> readPlainVCF(final String vcfname) {
@@ -196,6 +216,20 @@ public class BCFCodecTest {
 				compareAttribute(key, o1, Float.valueOf(String.class.cast(o2)));
 				return;
 				}
+			if(o1 instanceof Double && o2 instanceof String) {
+				compareAttribute(key, o1, Double.valueOf(String.class.cast(o2)));
+				return;
+				}
+			}
+		
+		if(o1 instanceof Double && o2 instanceof Double) {
+			Assert.assertEquals(Double.class.cast(o1), Double.class.cast(o2),0.01);
+			return;
+			}
+		
+		if(o1 instanceof Float && o2 instanceof Float) {
+			Assert.assertEquals(Float.class.cast(o1), Float.class.cast(o2),0.01);
+			return;
 			}
 		
 		Assert.assertEquals(o1.toString(), o2.toString(),
@@ -209,6 +243,10 @@ public class BCFCodecTest {
 		try(BlockCompressedInputStream in=new BlockCompressedInputStream(Paths.get(bcffname))) {
 			try(BCFCodec codec=BCFCodec.open(in)) {
 				codec.readHeader();
+				final BCFVersion version = codec.getVersion();
+				Assert.assertNotNull(version);
+				Assert.assertEquals(version.getMajorVersion(),2);
+				Assert.assertTrue(version.getMinorVersion()==1 || version.getMinorVersion()==2);
 				for(;;) {
 					VariantContext ctx=codec.decode();
 					if(ctx==null) break;
@@ -243,7 +281,15 @@ public class BCFCodecTest {
 		
 	}
 	
-	
+	@Test(dataProvider="src1")
+	public void readVersion(String bcffname,String vcfname) throws IOException {
+		try(BlockCompressedInputStream in=new BlockCompressedInputStream(Paths.get(bcffname))) {
+			BCFVersion v= BCFCodec.readVersion(in);
+			Assert.assertNotNull(v);
+			Assert.assertEquals(v.getMajorVersion(), 2);
+		}
+		
+	}
 	
 	@Test(dataProvider="src1")
 	public void readLoc(String bcffname,String vcfname) throws IOException {

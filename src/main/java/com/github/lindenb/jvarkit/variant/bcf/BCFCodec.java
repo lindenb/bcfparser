@@ -43,13 +43,16 @@ import htsjdk.samtools.seekablestream.SeekableStream;
 import htsjdk.samtools.seekablestream.SeekableStreamFactory;
 import htsjdk.samtools.util.BinaryCodec;
 import htsjdk.samtools.util.BlockCompressedInputStream;
+import htsjdk.samtools.util.IOUtil;
 import htsjdk.samtools.util.Interval;
 import htsjdk.samtools.util.Locatable;
 import htsjdk.samtools.util.Log;
+import htsjdk.tribble.FeatureCodecHeader;
 import htsjdk.tribble.readers.LineIterator;
 import htsjdk.tribble.readers.LineIteratorImpl;
 import htsjdk.tribble.readers.PositionalBufferedStream;
 import htsjdk.tribble.readers.SynchronousLineReader;
+import htsjdk.variant.bcf2.BCF2Codec;
 import htsjdk.variant.bcf2.BCFVersion;
 import htsjdk.variant.variantcontext.Allele;
 import htsjdk.variant.variantcontext.GenotypeBuilder;
@@ -65,13 +68,18 @@ import htsjdk.variant.vcf.VCFHeaderLine;
 import htsjdk.variant.vcf.VCFHeaderLineType;
 import htsjdk.variant.vcf.VCFInfoHeaderLine;
 
+/**
+ * Codec for BCF2.1 and BCF2.2
+ * @author lindenb
+ *
+ */
 class BCFCodec implements Closeable {
 	private static final String HTS_IDX_DELIM = "##idx##";
     private  InputStream mInputStream;    
 	private static final Log LOG=Log.getInstance(BCFCodec.class);
 	public static final byte[] MAGIC_HEADER_START = "BCF".getBytes();
 	private AbstractVersionCodec subCodec;
-	
+	private BCFVersion version = null;
 	
 
 	private abstract class AbstractVersionCodec {
@@ -85,7 +93,31 @@ class BCFCodec implements Closeable {
 			return decode();
 			}
 		}
-	
+	private class BCF2_1Codec extends AbstractVersionCodec {
+		private final BCF2Codec bcf21docec = new BCF2Codec();
+		private PositionalBufferedStream pbs = null;
+		private PositionalBufferedStream getPositionalBufferedStream() {
+			if(this.pbs==null) {
+				this.pbs = bcf21docec.makeSourceFromStream( BCFCodec.this.mInputStream);
+				}
+			return pbs;
+			}
+		@Override
+		public void rewind() throws IOException {
+			throw new IOException("sorry , random access is not available for BCF2.1");
+			}
+		@Override
+		public VCFHeader readHeader() throws IOException {
+			final FeatureCodecHeader vch= bcf21docec.readHeader(getPositionalBufferedStream());
+			return (VCFHeader)vch.getHeaderValue();
+			}
+		@Override
+		public VariantContext decode() throws IOException {
+			if(bcf21docec.isDone(getPositionalBufferedStream())) return null;
+			return bcf21docec.decode(getPositionalBufferedStream());
+			}
+		}
+
 	private class BCF2_2Codec extends AbstractVersionCodec {
 		byte[] buffer=null;
 		long firstVariantOffset = -1L;
@@ -505,28 +537,41 @@ private static Object castType(final VCFHeaderLineType type,Object o) {
 }
 	
 
-private BCFCodec(InputStream bci) {
+private BCFCodec(final InputStream bci) {
 	this.mInputStream = bci;
 }
 	
 	
-static BCFVersion readVersion(InputStream in)  throws IOException {
-	@SuppressWarnings("resource")
-	final BinaryCodec binaryCodec=new BinaryCodec(in);
-	final byte[] magicBytes = new byte[MAGIC_HEADER_START.length];
-    binaryCodec.readBytes(magicBytes);
-    if (!Arrays.equals(magicBytes, MAGIC_HEADER_START) ) throw new IOException("Cannot read BCF MAGIC");
-    final int majorByte =  binaryCodec.readUByte();
-    final int minorByte =  binaryCodec.readUByte();
-    return new BCFVersion(majorByte, minorByte);
+static BCFVersion readVersion(final InputStream in)  throws IOException {
+	
+	       @SuppressWarnings("resource")
+	      final BinaryCodec binaryCodec=new BinaryCodec(in);
+	       final byte[] magicBytes = new byte[MAGIC_HEADER_START.length];
+	    binaryCodec.readBytes(magicBytes);
+	    if (!Arrays.equals(magicBytes, MAGIC_HEADER_START) ) throw new IOException("Cannot read BCF MAGIC");
+	    final int majorByte =  binaryCodec.readUByte();
+	    final int minorByte =  binaryCodec.readUByte();
+	    return new BCFVersion(majorByte, minorByte);
+
+	
+	/*final BCFVersion version =  BCFVersion.readBCFVersion(in);
+	if(version==null) throw new IOException("Cannot read BCF version for "+in.getClass());
+	return version;*/
 	}
 
-public VCFHeader readHeader()  throws IOException {
-	@SuppressWarnings("resource")
-	final BCFVersion version =readVersion(this.mInputStream);
+VCFHeader readHeader()  throws IOException {
+	if(this.mInputStream.markSupported()) { //for BCF2.1 we need to rewind because the codec need to read the full header
+		this.mInputStream.mark(MAGIC_HEADER_START.length+2);
+		}
+	this.version =readVersion(this.mInputStream);
 	
-    if(version.getMajorVersion()==2 && version.getMinorVersion()==2) {
+    if(version!=null && version.getMajorVersion()==2 && version.getMinorVersion()==2) {
     	this.subCodec=new BCF2_2Codec();
+    	}
+    else if(version!=null && version.getMajorVersion()==2 &&  version.getMinorVersion()==1) {
+    	if(!this.mInputStream.markSupported()) throw new IOException("mark stream not supported for BC2.1 stream");
+    	this.mInputStream.reset();// reset to 'before' version
+    	this.subCodec=new BCF2_1Codec();
     	}
     else
     	{
@@ -539,21 +584,21 @@ private boolean isSupportingRandomAccess() {
 	return this.mInputStream instanceof BlockCompressedInputStream;
 }
 
-private long getPosition() {
+private long getPosition()  throws IOException  {
 	if(this.mInputStream instanceof BlockCompressedInputStream) {
 		return BlockCompressedInputStream.class.cast(this.mInputStream).getFilePointer();
 	} else
 	{
-		throw new IllegalArgumentException("not a seekable stream");
+		throw new IOException("not a seekable stream "+this.mInputStream.getClass());
 	}
 }
 
-public void seek(long position) throws IOException {
+public void seek(final long position) throws IOException {
 	if(this.mInputStream instanceof BlockCompressedInputStream) {
 		BlockCompressedInputStream.class.cast(this.mInputStream).seek(position);
 	} else
 	{
-		throw new IllegalArgumentException("not a seekable stream");
+		throw new IOException("not a seekable stream "+this.mInputStream.getClass());
 	}
 	}
 
@@ -585,14 +630,26 @@ public void close() {
 		}
 	}
 
+/** return BCF version, null before readHeader */
+public BCFVersion getVersion() {
+	return this.version;
+	}
+
 public static BCFCodec open(String path) throws IOException {
+	if(path==null) throw new IllegalArgumentException("null path");
 	path = splitPathAndIndex(path)[0];
-	ISeekableStreamFactory ssf = SeekableStreamFactory.getInstance();
+	final ISeekableStreamFactory ssf = SeekableStreamFactory.getInstance();
 	SeekableStream ss = ssf.getStreamFor(path);
 	ss= ssf.getBufferedStream(ss);
-	BlockCompressedInputStream bci=new BlockCompressedInputStream(ss);
-		
-	return new BCFCodec(bci);
+	InputStream in;
+	if(ss.markSupported() && !IOUtil.isGZIPInputStream(ss)) {
+		in = ss;
+	} else
+		{
+		in = new BlockCompressedInputStream(ss);
+		}
+	
+	return new BCFCodec(in);
 	}
 
 public static BCFCodec open(InputStream in) throws IOException {

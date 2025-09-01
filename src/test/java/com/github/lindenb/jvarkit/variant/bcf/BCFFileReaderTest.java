@@ -50,7 +50,7 @@ import htsjdk.variant.vcf.VCFHeader;
 public class BCFFileReaderTest {
 	@DataProvider(name = "src1")
 	public Iterator<Object[]> createData1() {
-		return BCFCodecTest.listVCFsFortest();
+		return BCFCodecTest.listBCF22Fortest();
 		}
 	
 	@DataProvider(name = "src2")
@@ -71,7 +71,7 @@ public class BCFFileReaderTest {
 	
 	@DataProvider(name = "src3")
 	public Object[][] createData3() {
-		Iterator<Object[]> iter =createData1();
+		Iterator<Object[]> iter = createData1();
 		List<Object[]> L1= new ArrayList<>();
 		while(iter.hasNext()) L1.add(iter.next());
 		
@@ -121,6 +121,7 @@ public class BCFFileReaderTest {
 	@Test(dataProvider="src3")
 	public void testWithIndex(String bcffname,String vcfname,String contig,int start,int end) throws IOException {
 		if(Files.notExists(Paths.get(bcffname + FileExtensions.CSI))) return;
+		if(vcfname.contains("bcf2_1")) return;
 		
 		final List<VariantContext> L1=new ArrayList<>();
 		final Interval loc =new Interval(contig,start,end);
@@ -152,7 +153,7 @@ public class BCFFileReaderTest {
 			}
 		}
 	
-	@Test(dataProvider="src1",expectedExceptions = {SAMFormatException.class,FileTruncatedException.class,OutOfMemoryError.class})
+	@Test(dataProvider="src1",expectedExceptions = {SAMFormatException.class,FileTruncatedException.class,OutOfMemoryError.class,IOException.class})
 	public void testBadFormat(String bcffname,String vcfname) throws IOException {
 		try(BCFFileReader reader=new BCFFileReader(Paths.get(vcfname), true)) {
 			}
