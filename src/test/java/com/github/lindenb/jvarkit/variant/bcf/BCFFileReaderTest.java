@@ -25,6 +25,7 @@ SOFTWARE.
 */
 package com.github.lindenb.jvarkit.variant.bcf;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.nio.file.Files;
@@ -38,7 +39,8 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-
+import htsjdk.samtools.FileTruncatedException;
+import htsjdk.samtools.SAMFormatException;
 import htsjdk.samtools.util.CloseableIterator;
 import htsjdk.samtools.util.FileExtensions;
 import htsjdk.samtools.util.Interval;
@@ -142,4 +144,17 @@ public class BCFFileReaderTest {
 		final List<VariantContext> L2= BCFCodecTest.readPlainVCF(vcfname).stream().filter(it->it.overlaps(loc)).collect(Collectors.toList());
 		BCFCodecTest.compareLists(L1, L2);
 	}
+	
+	@Test(dataProvider="src1",expectedExceptions = FileNotFoundException.class)
+	public void testThrowIndexMissing(String bcffname,String vcfname) throws IOException {
+		if(Files.exists(Paths.get(bcffname + FileExtensions.CSI))) throw new FileNotFoundException("just pass the test");
+		try(BCFFileReader reader=new BCFFileReader(Paths.get(bcffname), true)) {
+			}
+		}
+	
+	@Test(dataProvider="src1",expectedExceptions = {SAMFormatException.class,FileTruncatedException.class,OutOfMemoryError.class})
+	public void testBadFormat(String bcffname,String vcfname) throws IOException {
+		try(BCFFileReader reader=new BCFFileReader(Paths.get(vcfname), true)) {
+			}
+		}
 }

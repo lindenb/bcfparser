@@ -36,6 +36,8 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import htsjdk.samtools.FileTruncatedException;
+import htsjdk.samtools.SAMFormatException;
 import htsjdk.samtools.util.CloseableIterator;
 import htsjdk.variant.variantcontext.VariantContext;
 import htsjdk.variant.vcf.VCFFileReader;
@@ -72,4 +74,10 @@ public class BCFIteratorTest {
 		Assert.assertFalse(L2.isEmpty(),"NO variant was found");
 		BCFCodecTest.compareLists(L1, L2);
 	}
+	
+	@Test(dataProvider="src1",expectedExceptions = {SAMFormatException.class,FileTruncatedException.class})
+	public void testBadFormat(String bcffname,String vcfname) throws IOException {
+		try(BCFIterator reader= BCFIterator.open(vcfname)) {
+			}
+		}
 }
