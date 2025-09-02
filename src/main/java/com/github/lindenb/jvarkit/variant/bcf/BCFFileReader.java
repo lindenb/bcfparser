@@ -29,9 +29,13 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 import htsjdk.samtools.BAMFileSpan;
+import htsjdk.samtools.BAMIndexMetaData;
 import htsjdk.samtools.CSIIndex;
+import htsjdk.samtools.SAMSequenceDictionary;
 import htsjdk.samtools.util.AbstractIterator;
 import htsjdk.samtools.util.CloseableIterator;
 import htsjdk.samtools.util.FileExtensions;
@@ -65,7 +69,7 @@ private BCFFileReader(final BCFCodec codec)  throws IOException  {
  * @param requireIndex shall we load an index 
  * @throws IOException on I/O error
  */
-public	BCFFileReader(Path file,boolean requireIndex) throws IOException {
+public	BCFFileReader(final Path file,boolean requireIndex) throws IOException {
 	this(BCFCodec.open(file.toString()));
 	
 	if(requireIndex) {
@@ -79,7 +83,21 @@ public	BCFFileReader(Path file,boolean requireIndex) throws IOException {
 		}
 	}
 
-
+/** return the chromosomes carrying variants for this BCF file 
+ * @throws IllegalStateException if there is no index
+ * @return  the chromosomes carrying variants for this BCF file
+ */
+public List<String> getChromosomes() {
+	if(this.index==null) throw new IllegalStateException("Cannot invoke getChromosomes() if there is no associated index");
+	final SAMSequenceDictionary dict = this.header.getSequenceDictionary();
+	final List<String> chroms = new ArrayList<>();
+	for(int i=0;i< dict.size();i++) {
+		final BAMIndexMetaData meta= this.index.getMetaData(i);
+		if(meta==null || meta.getAlignedRecordCount()==0) continue;
+		chroms.add(dict.getSequence(i).getContig());
+		}
+	return chroms;
+	}
 
 @Override
 public CloseableIterator<VariantContext> iterator() {
