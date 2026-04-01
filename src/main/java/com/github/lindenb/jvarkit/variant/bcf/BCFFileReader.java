@@ -61,7 +61,7 @@ private BaseIterator currentIterator=null;
 
 private BCFFileReader(final BCFCodec codec)  throws IOException  {
 	this.codec= codec;
-	this.header=(VCFHeader)this.codec.readHeader();
+	this.header= this.codec.readHeader();
 	}
 /**
  * Open a new BCFFileReader
