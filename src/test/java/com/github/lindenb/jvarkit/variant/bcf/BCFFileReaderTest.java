@@ -31,8 +31,10 @@ import java.nio.file.Paths;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.testng.Assert;
@@ -158,4 +160,20 @@ public class BCFFileReaderTest {
 		try(BCFFileReader reader=new BCFFileReader(Paths.get(vcfname), true)) {
 			}
 		}
+	
+	@Test(dataProvider="src1")
+	public void testChromosomes(String bcffname,String vcfname) throws IOException{
+		if(Files.notExists(Paths.get(bcffname + FileExtensions.CSI))) return;
+		if(vcfname.contains("bcf2_1")) return;
+
+		final Set<String> L1=new HashSet<>();
+		try(BCFFileReader reader=new BCFFileReader(Paths.get(bcffname),true)) {
+			L1.addAll(reader.getChromosomes());
+			}
+		Assert.assertFalse(L1.isEmpty(),"NO Chromosomes was found");
+		
+		final Set<String> L2= BCFCodecTest.readPlainVCF(vcfname).stream().map(it->it.getContig()).collect(Collectors.toSet());
+		Assert.assertEquals(L1,L2);
+		}
+	
 }
